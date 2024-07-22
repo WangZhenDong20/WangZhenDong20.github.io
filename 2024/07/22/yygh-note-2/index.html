@@ -1,0 +1,608 @@
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta property="og:site_name" content="SleepingFace Blog"><meta property="og:type" content="article"><meta property="og:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta property="twitter:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta name=title content="尚医通项目笔记（二）"><meta property="og:title" content="尚医通项目笔记（二）"><meta property="twitter:title" content="尚医通项目笔记（二）"><meta name=description content="学习尚医通开源项目的过程笔记."><meta property="og:description" content="学习尚医通开源项目的过程笔记."><meta property="twitter:description" content="学习尚医通开源项目的过程笔记."><meta property="twitter:card" content="summary"><meta name=keyword content="WangZhendong"><link rel="shortcut icon" href=/img/favicon.ico><title>尚医通项目笔记（二） | 王振东的博客 | WangZhendong Blog</title>
+<link rel=canonical href=/2024/07/22/yygh-note-2/><link rel=stylesheet href=/css/bootstrap.min.css><link rel=stylesheet href=/css/hugo-theme-cleanwhite.min.css><link rel=stylesheet href=/css/zanshang.css><link rel=stylesheet href=/css/font-awesome.all.min.css><script src=/js/jquery.min.js></script><script src=/js/bootstrap.min.js></script><script src=/js/hux-blog.min.js></script><script src=/js/lazysizes.min.js></script></head><nav class="navbar navbar-default navbar-custom navbar-fixed-top"><div class=container-fluid><div class="navbar-header page-scroll"><button type=button class=navbar-toggle>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+</button>
+<a class=navbar-brand href=/>SleepingFace Blog</a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/>All Posts</a></li><li><a href=/categories/tech/>tech</a></li><li><a href=/archive//>ARCHIVE</a></li><li><a href=/notes//>NOTES</a></li><li><a href=/about//>ABOUT</a></li><li><a href=/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/img/home1.jpg)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/java title=Java>Java
+</a><a class=tag href=/tags/mongodb title=MongoDB>MongoDB
+</a><a class=tag href=/tags/mysql title=MySQL>MySQL
+</a><a class=tag href=/tags/redis title=Redis>Redis
+</a><a class=tag href=/tags/kafka title=Kafka>Kafka
+</a><a class=tag href=/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1 title=微服务>微服务</a></div><h1>尚医通项目笔记（二）</h1><h2 class=subheading></h2><span class=meta>Posted by
+SleepingFace
+on
+Monday, July 22, 2024</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+post-container"><h1 id=9-nacos>9. Nacos</h1><h2 id=步骤>步骤</h2><h3 id=依赖>依赖</h3><pre tabindex=0><code>&lt;dependency&gt;
+     &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+     &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;
+ &lt;/dependency&gt;
+</code></pre><h3 id=配置>配置</h3><pre tabindex=0><code>spring.cloud.nacos.discovery.server-addr=127.0.0.1:8848
+</code></pre><h3 id=在启动类上添加enablediscoveryclient>在启动类上添加@EnableDiscoveryClient</h3><pre tabindex=0><code>@SpringBootApplication
+@ComponentScan(basePackages = &#34;com.atguigu&#34;)
+@EnableDiscoveryClient
+@EnableFeignClients(basePackages = &#34;com.atguigu&#34;)
+public class ServiceHospApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(ServiceHospApplication.class, args);
+    }
+}
+</code></pre><h1 id=10-后台系统-医院管理>10. 后台系统-医院管理</h1><h2 id=101-医院列表>10.1 医院列表</h2><h3 id=初步实现>初步实现</h3><p>// HospitalController</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>//医院列表(条件查询分页)</span>
+</span></span><span style=display:flex><span>@GetMapping(<span style=color:#f1fa8c>&#34;list/{page}/{limit}&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> Result <span style=color:#50fa7b>listHosp</span>(@PathVariable Integer page,
+</span></span><span style=display:flex><span>                       @PathVariable Integer limit,
+</span></span><span style=display:flex><span>                       @RequestBody HospitalQueryVo hospitalQueryVo) {
+</span></span><span style=display:flex><span>    Page<span style=color:#ff79c6>&lt;</span>Hospital<span style=color:#ff79c6>&gt;</span> pageModel <span style=color:#ff79c6>=</span> hospitalService.<span style=color:#50fa7b>selectHospPage</span>(page,limit,hospitalQueryVo);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> Result.<span style=color:#50fa7b>ok</span>(pageModel);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>// HospitalServiceImpl</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> Page<span style=color:#ff79c6>&lt;</span>Hospital<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>selectHospPage</span>(Integer page, Integer limit, HospitalQueryVo hospitalQueryVo) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Pageable pageable <span style=color:#ff79c6>=</span> PageRequest.<span style=color:#50fa7b>of</span>(page<span style=color:#ff79c6>-</span>1,limit);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Hospital hospital <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Hospital();
+</span></span><span style=display:flex><span>    BeanUtils.<span style=color:#50fa7b>copyProperties</span>(hospitalQueryVo,hospital);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    ExampleMatcher matcher <span style=color:#ff79c6>=</span> ExampleMatcher.<span style=color:#50fa7b>matching</span>()
+</span></span><span style=display:flex><span>            .<span style=color:#50fa7b>withStringMatcher</span>(ExampleMatcher.<span style=color:#50fa7b>StringMatcher</span>.<span style=color:#50fa7b>CONTAINING</span>)
+</span></span><span style=display:flex><span>            .<span style=color:#50fa7b>withIgnoreCase</span>(<span style=color:#ff79c6>true</span>);
+</span></span><span style=display:flex><span>    Example<span style=color:#ff79c6>&lt;</span>Hospital<span style=color:#ff79c6>&gt;</span> example <span style=color:#ff79c6>=</span> Example.<span style=color:#50fa7b>of</span>(hospital,matcher);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Page<span style=color:#ff79c6>&lt;</span>Hospital<span style=color:#ff79c6>&gt;</span> pages <span style=color:#ff79c6>=</span> hospitalRepository.<span style=color:#50fa7b>findAll</span>(example, pageable);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> pages;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=医院等级接口>医院等级接口</h3><p>//DictController</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>//根据dictcode和value查询</span>
+</span></span><span style=display:flex><span>@GetMapping(<span style=color:#f1fa8c>&#34;getName/{dictCode}/{value}&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> String <span style=color:#50fa7b>getName</span>(@PathVariable String dictCode,
+</span></span><span style=display:flex><span>                      @PathVariable String value) {
+</span></span><span style=display:flex><span>    String dictName <span style=color:#ff79c6>=</span> dictService.<span style=color:#50fa7b>getDictName</span>(dictCode,value);
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> dictName;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>//根据value查询</span>
+</span></span><span style=display:flex><span>@GetMapping(<span style=color:#f1fa8c>&#34;getName/{value}&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> String <span style=color:#50fa7b>getName</span>(@PathVariable String value) {
+</span></span><span style=display:flex><span>    String dictName <span style=color:#ff79c6>=</span> dictService.<span style=color:#50fa7b>getDictName</span>(<span style=color:#f1fa8c>&#34;&#34;</span>,value);
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> dictName;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>//DictServiceImpl</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> String <span style=color:#50fa7b>getDictName</span>(String dictCode, String value) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>if</span> (StringUtils.<span style=color:#50fa7b>isEmpty</span>(dictCode)) {
+</span></span><span style=display:flex><span>        QueryWrapper<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span> wrapper <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> QueryWrapper<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        wrapper.<span style=color:#50fa7b>eq</span>(<span style=color:#f1fa8c>&#34;value&#34;</span>,value);
+</span></span><span style=display:flex><span>        Dict dict <span style=color:#ff79c6>=</span> baseMapper.<span style=color:#50fa7b>selectOne</span>(wrapper);
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> dict.<span style=color:#50fa7b>getName</span>();
+</span></span><span style=display:flex><span>    } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//根据dictcode查询dict对象，得到dict的id值</span>
+</span></span><span style=display:flex><span>        Dict codeDict <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>getDictByDictCode</span>(dictCode);
+</span></span><span style=display:flex><span>        Long parent_id <span style=color:#ff79c6>=</span> codeDict.<span style=color:#50fa7b>getId</span>();
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//根据parent_id和value进行查询</span>
+</span></span><span style=display:flex><span>        Dict finalDict <span style=color:#ff79c6>=</span> baseMapper.<span style=color:#50fa7b>selectOne</span>(<span style=color:#ff79c6>new</span> QueryWrapper<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span>()
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>eq</span>(<span style=color:#f1fa8c>&#34;parent_id&#34;</span>, parent_id).<span style=color:#50fa7b>eq</span>(<span style=color:#f1fa8c>&#34;value&#34;</span>, value));
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> finalDict.<span style=color:#50fa7b>getName</span>();
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> Dict <span style=color:#50fa7b>getDictByDictCode</span>(String dictCode) {
+</span></span><span style=display:flex><span>    QueryWrapper<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span> wrapper <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> QueryWrapper<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>    wrapper.<span style=color:#50fa7b>eq</span>(<span style=color:#f1fa8c>&#34;dictCode&#34;</span>,dictCode);
+</span></span><span style=display:flex><span>    Dict codeDict <span style=color:#ff79c6>=</span> baseMapper.<span style=color:#50fa7b>selectOne</span>(wrapper);
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> codeDict;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=远程调用封装feign服务调用>远程调用(封装Feign服务调用)</h3><p><img src=/img/2024-07-22-yygh-note/assets/Snipaste_2024-01-13_20-46-52.png alt=目录></p><h4 id=步骤1>步骤1：</h4><p>//service_client -> pom.xml</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-xml data-lang=xml><span style=display:flex><span><span style=color:#ff79c6>&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;project</span> <span style=color:#50fa7b>xmlns=</span><span style=color:#f1fa8c>&#34;http://maven.apache.org/POM/4.0.0&#34;</span>
+</span></span><span style=display:flex><span>         <span style=color:#50fa7b>xmlns:xsi=</span><span style=color:#f1fa8c>&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span>
+</span></span><span style=display:flex><span>         <span style=color:#50fa7b>xsi:schemaLocation=</span><span style=color:#f1fa8c>&#34;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&#34;</span><span style=color:#ff79c6>&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;parent&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;artifactId&gt;</span>yygh_parent<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;groupId&gt;</span>com.atguigu<span style=color:#ff79c6>&lt;/groupId&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;version&gt;</span>0.0.1-SNAPSHOT<span style=color:#ff79c6>&lt;/version&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;/parent&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;modelVersion&gt;</span>4.0.0<span style=color:#ff79c6>&lt;/modelVersion&gt;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;artifactId&gt;</span>service_client<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;packaging&gt;</span>pom<span style=color:#ff79c6>&lt;/packaging&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;modules&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;module&gt;</span>service_cmn_client<span style=color:#ff79c6>&lt;/module&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;module&gt;</span>service_user_client<span style=color:#ff79c6>&lt;/module&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;module&gt;</span>service_hosp_client<span style=color:#ff79c6>&lt;/module&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;module&gt;</span>service_order_client<span style=color:#ff79c6>&lt;/module&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;/modules&gt;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;dependencies&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;dependency&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;groupId&gt;</span>com.atguigu<span style=color:#ff79c6>&lt;/groupId&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;artifactId&gt;</span>common_util<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;version&gt;</span>0.0.1-SNAPSHOT<span style=color:#ff79c6>&lt;/version&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;scope&gt;</span>provided <span style=color:#ff79c6>&lt;/scope&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;/dependency&gt;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;dependency&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;groupId&gt;</span>com.atguigu<span style=color:#ff79c6>&lt;/groupId&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;artifactId&gt;</span>model<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;version&gt;</span>0.0.1-SNAPSHOT<span style=color:#ff79c6>&lt;/version&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;scope&gt;</span>provided <span style=color:#ff79c6>&lt;/scope&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;/dependency&gt;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;dependency&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;groupId&gt;</span>org.springframework.boot<span style=color:#ff79c6>&lt;/groupId&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;artifactId&gt;</span>spring-boot-starter-web<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;scope&gt;</span>provided <span style=color:#ff79c6>&lt;/scope&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;/dependency&gt;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>&lt;!-- 服务调用feign --&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;dependency&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;groupId&gt;</span>org.springframework.cloud<span style=color:#ff79c6>&lt;/groupId&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;artifactId&gt;</span>spring-cloud-starter-openfeign<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;scope&gt;</span>provided <span style=color:#ff79c6>&lt;/scope&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;/dependency&gt;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;/dependencies&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;/project&gt;</span>
+</span></span></code></pre></div><p>// service_cmn_client</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-xml data-lang=xml><span style=display:flex><span><span style=color:#ff79c6>&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;project</span> <span style=color:#50fa7b>xmlns=</span><span style=color:#f1fa8c>&#34;http://maven.apache.org/POM/4.0.0&#34;</span>
+</span></span><span style=display:flex><span>         <span style=color:#50fa7b>xmlns:xsi=</span><span style=color:#f1fa8c>&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span>
+</span></span><span style=display:flex><span>         <span style=color:#50fa7b>xsi:schemaLocation=</span><span style=color:#f1fa8c>&#34;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&#34;</span><span style=color:#ff79c6>&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;parent&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;artifactId&gt;</span>service_client<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;groupId&gt;</span>com.atguigu<span style=color:#ff79c6>&lt;/groupId&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;version&gt;</span>0.0.1-SNAPSHOT<span style=color:#ff79c6>&lt;/version&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;/parent&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;modelVersion&gt;</span>4.0.0<span style=color:#ff79c6>&lt;/modelVersion&gt;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;artifactId&gt;</span>service_cmn_client<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;packaging&gt;</span>jar<span style=color:#ff79c6>&lt;/packaging&gt;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;/project&gt;</span>
+</span></span></code></pre></div><p><img src=/img/2024-07-22-yygh-note/assets/Snipaste_2024-01-13_20-56-23.png alt=service_cmn_client></p><p>//DictFeignClient</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@FeignClient(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;service-cmn&#34;</span>)
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@FeignClient(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;service-cmn&#34;</span>)
+</span></span><span style=display:flex><span>@Repository
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>interface</span> <span style=color:#50fa7b>DictFeignClient</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//根据dictcode和value查询</span>
+</span></span><span style=display:flex><span>    @GetMapping(<span style=color:#f1fa8c>&#34;/admin/cmn/dict/getName/{dictCode}/{value}&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> String <span style=color:#50fa7b>getName</span>(@PathVariable(<span style=color:#f1fa8c>&#34;dictCode&#34;</span>) String dictCode, @PathVariable(<span style=color:#f1fa8c>&#34;value&#34;</span>) String value);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//根据value查询</span>
+</span></span><span style=display:flex><span>    @GetMapping(<span style=color:#f1fa8c>&#34;/admin/cmn/dict/getName/{value}&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> String <span style=color:#50fa7b>getName</span>(@PathVariable(<span style=color:#f1fa8c>&#34;value&#34;</span>) String value);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=步骤2>步骤2：</h4><p>将依赖导入到调用者的pom文件里</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-xml data-lang=xml><span style=display:flex><span><span style=color:#ff79c6>&lt;dependency&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;groupId&gt;</span>com.atguigu<span style=color:#ff79c6>&lt;/groupId&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;artifactId&gt;</span>service_cmn_client<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;version&gt;</span>0.0.1-SNAPSHOT<span style=color:#ff79c6>&lt;/version&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;/dependency&gt;</span>
+</span></span></code></pre></div><p>之后注入到ServiceImpl中</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Autowired
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> DictFeignClient dictFeignClient;
+</span></span></code></pre></div><h4 id=步骤3>步骤3：</h4><p>在启动类上加入注解**@EnableFeignClients(basePackages = &ldquo;com.atguigu&rdquo;)**</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@SpringBootApplication
+</span></span><span style=display:flex><span>@ComponentScan(basePackages <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;com.atguigu&#34;</span>)
+</span></span><span style=display:flex><span>@EnableDiscoveryClient
+</span></span><span style=display:flex><span>@EnableFeignClients(basePackages <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;com.atguigu&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>ServiceHospApplication</span> {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>main</span>(String<span style=color:#ff79c6>[]</span> args) {
+</span></span><span style=display:flex><span>        SpringApplication.<span style=color:#50fa7b>run</span>(ServiceHospApplication.<span style=color:#50fa7b>class</span>, args);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=导入等级信息完整实现>导入等级信息完整实现</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> Page<span style=color:#ff79c6>&lt;</span>Hospital<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>selectHospPage</span>(Integer page, Integer limit, HospitalQueryVo hospitalQueryVo) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Pageable pageable <span style=color:#ff79c6>=</span> PageRequest.<span style=color:#50fa7b>of</span>(page<span style=color:#ff79c6>-</span>1,limit);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Hospital hospital <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Hospital();
+</span></span><span style=display:flex><span>    BeanUtils.<span style=color:#50fa7b>copyProperties</span>(hospitalQueryVo,hospital);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    ExampleMatcher matcher <span style=color:#ff79c6>=</span> ExampleMatcher.<span style=color:#50fa7b>matching</span>()
+</span></span><span style=display:flex><span>            .<span style=color:#50fa7b>withStringMatcher</span>(ExampleMatcher.<span style=color:#50fa7b>StringMatcher</span>.<span style=color:#50fa7b>CONTAINING</span>)
+</span></span><span style=display:flex><span>            .<span style=color:#50fa7b>withIgnoreCase</span>(<span style=color:#ff79c6>true</span>);
+</span></span><span style=display:flex><span>    Example<span style=color:#ff79c6>&lt;</span>Hospital<span style=color:#ff79c6>&gt;</span> example <span style=color:#ff79c6>=</span> Example.<span style=color:#50fa7b>of</span>(hospital,matcher);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Page<span style=color:#ff79c6>&lt;</span>Hospital<span style=color:#ff79c6>&gt;</span> pages <span style=color:#ff79c6>=</span> hospitalRepository.<span style=color:#50fa7b>findAll</span>(example, pageable);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//导入等级信息</span>
+</span></span><span style=display:flex><span>    pages.<span style=color:#50fa7b>getContent</span>().<span style=color:#50fa7b>stream</span>().<span style=color:#50fa7b>forEach</span>(item <span style=color:#ff79c6>-&gt;</span> {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>setHospitalHosType</span>(item);
+</span></span><span style=display:flex><span>    });
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> pages;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>//获取查询list集合，遍历进行医院等级封装</span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> Hospital <span style=color:#50fa7b>setHospitalHosType</span>(Hospital item) {
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//根据dictCode和value获取医院等级名称</span>
+</span></span><span style=display:flex><span>    String hostypeString <span style=color:#ff79c6>=</span> dictFeignClient.<span style=color:#50fa7b>getName</span>(<span style=color:#f1fa8c>&#34;Hostype&#34;</span>, item.<span style=color:#50fa7b>getHostype</span>());
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//查询省 市  地区</span>
+</span></span><span style=display:flex><span>    String provinceString <span style=color:#ff79c6>=</span> dictFeignClient.<span style=color:#50fa7b>getName</span>(item.<span style=color:#50fa7b>getProvinceCode</span>());
+</span></span><span style=display:flex><span>    String cityString <span style=color:#ff79c6>=</span> dictFeignClient.<span style=color:#50fa7b>getName</span>(item.<span style=color:#50fa7b>getCityCode</span>());
+</span></span><span style=display:flex><span>    String districtString <span style=color:#ff79c6>=</span> dictFeignClient.<span style=color:#50fa7b>getName</span>(item.<span style=color:#50fa7b>getDistrictCode</span>());
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    item.<span style=color:#50fa7b>getParam</span>().<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;fullAddress&#34;</span>,provinceString<span style=color:#ff79c6>+</span>cityString<span style=color:#ff79c6>+</span>districtString);
+</span></span><span style=display:flex><span>    item.<span style=color:#50fa7b>getParam</span>().<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;hostypeString&#34;</span>,hostypeString);
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> item;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=查询所有子节点接口省市二级联动>查询所有子节点接口（省市二级联动）</h3><p><strong>显示省级，然后显示该省下的市级</strong></p><h4 id=根据dictcode查询下级节点>根据dictCode查询下级节点</h4><p>//DictController</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>//根据dictCode获取下级节点</span>
+</span></span><span style=display:flex><span>@ApiOperation(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;根据dictCode获取下级节点&#34;</span>)
+</span></span><span style=display:flex><span>@GetMapping(<span style=color:#f1fa8c>&#34;findByDictCode/{dictCode}&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> Result <span style=color:#50fa7b>findByDictCode</span>(@PathVariable String dictCode) {
+</span></span><span style=display:flex><span>    List<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span> list <span style=color:#ff79c6>=</span> dictService.<span style=color:#50fa7b>findByDictCode</span>(dictCode);
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> Result.<span style=color:#50fa7b>ok</span>(list);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>//DictServiceImpl</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> List<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>findByDictCode</span>(String dictCode) {
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//根据dictcode获取对应id</span>
+</span></span><span style=display:flex><span>    Dict dict <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>getDictByDictCode</span>(dictCode);
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//根据id获取子节点</span>
+</span></span><span style=display:flex><span>    List<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span> childData <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>findChildData</span>(dict.<span style=color:#50fa7b>getId</span>());
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> childData;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=102-更新医院上线状态>10.2 更新医院上线状态</h2><p>//HospitalController</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>//更新医院上线状态</span>
+</span></span><span style=display:flex><span>@ApiOperation(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;更新医院上线状态&#34;</span>)
+</span></span><span style=display:flex><span>@GetMapping(<span style=color:#f1fa8c>&#34;updateHospStatus/{id}/{status}&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> Result <span style=color:#50fa7b>updateHospStatus</span>(@PathVariable String id,
+</span></span><span style=display:flex><span>                               @PathVariable Integer status) {
+</span></span><span style=display:flex><span>    hospitalService.<span style=color:#50fa7b>updateStatue</span>(id,status);
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> Result.<span style=color:#50fa7b>ok</span>();
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>//HospitalSeriveImpl</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>updateStatue</span>(String id, Integer status) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Hospital hospital <span style=color:#ff79c6>=</span> hospitalRepository.<span style=color:#50fa7b>findById</span>(id).<span style=color:#50fa7b>get</span>();
+</span></span><span style=display:flex><span>    hospital.<span style=color:#50fa7b>setUpdateTime</span>(<span style=color:#ff79c6>new</span> Date());
+</span></span><span style=display:flex><span>    hospital.<span style=color:#50fa7b>setStatus</span>(status);
+</span></span><span style=display:flex><span>    hospitalRepository.<span style=color:#50fa7b>save</span>(hospital);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=103-医院详情>10.3 医院详情</h2><p>//HospitalController</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>//医院详情信息</span>
+</span></span><span style=display:flex><span>@ApiOperation(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;医院详情信息&#34;</span>)
+</span></span><span style=display:flex><span>@GetMapping(<span style=color:#f1fa8c>&#34;showHospDetail/{id}&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> Result <span style=color:#50fa7b>showHospDetail</span>(@PathVariable String id) {
+</span></span><span style=display:flex><span>    Map<span style=color:#ff79c6>&lt;</span>String,Object<span style=color:#ff79c6>&gt;</span> map <span style=color:#ff79c6>=</span> hospitalService.<span style=color:#50fa7b>getHospById</span>(id);
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> Result.<span style=color:#50fa7b>ok</span>();
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>//HospitalSeriveImpl</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> Map<span style=color:#ff79c6>&lt;</span>String, Object<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>getHospById</span>(String id) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Map<span style=color:#ff79c6>&lt;</span>String,Object<span style=color:#ff79c6>&gt;</span> result <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> HashMap<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Hospital hospital <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>setHospitalHosType</span>(hospitalRepository.<span style=color:#50fa7b>findById</span>(id).<span style=color:#50fa7b>get</span>());
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//医院基本信息（包含医院等级）</span>
+</span></span><span style=display:flex><span>    result.<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;hospital&#34;</span>,hospital);
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//单独处理更直观</span>
+</span></span><span style=display:flex><span>    result.<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;bookingRule&#34;</span>,hospital.<span style=color:#50fa7b>getBookingRule</span>());
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//不需要重复返回</span>
+</span></span><span style=display:flex><span>    hospital.<span style=color:#50fa7b>setBookingRule</span>(<span style=color:#ff79c6>null</span>);
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> result;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=104-医院排班>10.4 医院排班</h2><h3 id=需求分析>需求分析</h3><p><img src=/img/2024-07-22-yygh-note/assets/Snipaste_2024-01-13_21-52-32.png alt=医院排版实例></p><p><img src=/img/2024-07-22-yygh-note/assets/Snipaste_2024-01-13_21-56-20.png alt=科室树形列表></p><h3 id=显示科室>显示科室</h3><h4 id=departmentvo类>DepartmentVo类</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Data
+</span></span><span style=display:flex><span>@ApiModel(description <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;Department&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>DepartmentVo</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>   @ApiModelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;科室编号&#34;</span>)
+</span></span><span style=display:flex><span>   <span style=color:#8be9fd;font-style:italic>private</span> String depcode;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>   @ApiModelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;科室名称&#34;</span>)
+</span></span><span style=display:flex><span>   <span style=color:#8be9fd;font-style:italic>private</span> String depname;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>   @ApiModelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;下级节点&#34;</span>)
+</span></span><span style=display:flex><span>   <span style=color:#8be9fd;font-style:italic>private</span> List<span style=color:#ff79c6>&lt;</span>DepartmentVo<span style=color:#ff79c6>&gt;</span> children;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=功能实现>功能实现</h4><p>// DepartmentController</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@ApiOperation(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;查询医院所有科室列表&#34;</span>)
+</span></span><span style=display:flex><span>@GetMapping(<span style=color:#f1fa8c>&#34;getDeptList/{hoscode}&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> Result <span style=color:#50fa7b>getDeptList</span>(@PathVariable String hoscode) {
+</span></span><span style=display:flex><span>    List<span style=color:#ff79c6>&lt;</span>DepartmentVo<span style=color:#ff79c6>&gt;</span> list <span style=color:#ff79c6>=</span> departmentService.<span style=color:#50fa7b>findDeptTree</span>(hoscode);
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> Result.<span style=color:#50fa7b>ok</span>(list);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>// DepartmentServiceImpl</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> List<span style=color:#ff79c6>&lt;</span>DepartmentVo<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>findDeptTree</span>(String hoscode) {
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//创建list集合，用于最终数据封装</span>
+</span></span><span style=display:flex><span>    List<span style=color:#ff79c6>&lt;</span>DepartmentVo<span style=color:#ff79c6>&gt;</span> result <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//根据医院编号，查询医院所有科室信息</span>
+</span></span><span style=display:flex><span>    Department departmentQuery <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Department();
+</span></span><span style=display:flex><span>    departmentQuery.<span style=color:#50fa7b>setHoscode</span>(hoscode);
+</span></span><span style=display:flex><span>    Example example <span style=color:#ff79c6>=</span> Example.<span style=color:#50fa7b>of</span>(departmentQuery);
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//所有科室列表 departmentAll</span>
+</span></span><span style=display:flex><span>    List<span style=color:#ff79c6>&lt;</span>Department<span style=color:#ff79c6>&gt;</span> departmentAll <span style=color:#ff79c6>=</span> departmentRepository.<span style=color:#50fa7b>findAll</span>(example);
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//根据大科室编号  bigcode 分组，获取每个大科室里面下级子科室</span>
+</span></span><span style=display:flex><span>    Map<span style=color:#ff79c6>&lt;</span>String, List<span style=color:#ff79c6>&lt;</span>Department<span style=color:#ff79c6>&gt;&gt;</span> departmentMap <span style=color:#ff79c6>=</span> departmentAll.<span style=color:#50fa7b>stream</span>().<span style=color:#50fa7b>collect</span>(Collectors.<span style=color:#50fa7b>groupingBy</span>(Department::getBigcode));
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//遍历map集合 deparmentMap</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>for</span> (Map.<span style=color:#50fa7b>Entry</span><span style=color:#ff79c6>&lt;</span>String, List<span style=color:#ff79c6>&lt;</span>Department<span style=color:#ff79c6>&gt;&gt;</span> departmentEntry : departmentMap.<span style=color:#50fa7b>entrySet</span>()) {
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//大科室编号</span>
+</span></span><span style=display:flex><span>        String bigCode <span style=color:#ff79c6>=</span> departmentEntry.<span style=color:#50fa7b>getKey</span>();
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//大科室编号对应的全局数据</span>
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>Department<span style=color:#ff79c6>&gt;</span> departments <span style=color:#ff79c6>=</span> departmentEntry.<span style=color:#50fa7b>getValue</span>();
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//封装大科室</span>
+</span></span><span style=display:flex><span>        DepartmentVo departmentVo1 <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> DepartmentVo();
+</span></span><span style=display:flex><span>        departmentVo1.<span style=color:#50fa7b>setDepcode</span>(bigCode);
+</span></span><span style=display:flex><span>        departmentVo1.<span style=color:#50fa7b>setDepname</span>(departmentAll.<span style=color:#50fa7b>get</span>(0).<span style=color:#50fa7b>getDepname</span>());
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//封装小科室</span>
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>DepartmentVo<span style=color:#ff79c6>&gt;</span> child <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (Department department : departments) {
+</span></span><span style=display:flex><span>            DepartmentVo departmentVo2 <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> DepartmentVo();
+</span></span><span style=display:flex><span>            departmentVo2.<span style=color:#50fa7b>setDepcode</span>(department.<span style=color:#50fa7b>getDepcode</span>());
+</span></span><span style=display:flex><span>            departmentVo2.<span style=color:#50fa7b>setDepname</span>(department.<span style=color:#50fa7b>getDepname</span>());
+</span></span><span style=display:flex><span>            child.<span style=color:#50fa7b>add</span>(departmentVo2);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//把小科室list集合放到大科室children里面</span>
+</span></span><span style=display:flex><span>        departmentVo1.<span style=color:#50fa7b>setChildren</span>(child);
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//放到最终result里面</span>
+</span></span><span style=display:flex><span>        result.<span style=color:#50fa7b>add</span>(departmentVo1);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> result;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=排版规则>排版规则</h3><p>根据医院编码和科室编号查询，分页显示。还包括一些统计聚合等操作(使用MongoTemplate更为方便)</p><h4 id=功能实现-1>功能实现</h4><h5 id=schedulecontroller>ScheduleController</h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@ApiOperation(value <span style=color:#ff79c6>=</span><span style=color:#f1fa8c>&#34;查询排班规则数据&#34;</span>)
+</span></span><span style=display:flex><span>@GetMapping(<span style=color:#f1fa8c>&#34;getScheduleRule/{page}/{limit}/{hoscode}/{depcode}&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> Result <span style=color:#50fa7b>getScheduleRule</span>(@PathVariable <span style=color:#8be9fd>long</span> page,
+</span></span><span style=display:flex><span>                              @PathVariable <span style=color:#8be9fd>long</span> limit,
+</span></span><span style=display:flex><span>                              @PathVariable String hoscode,
+</span></span><span style=display:flex><span>                              @PathVariable String depcode) {
+</span></span><span style=display:flex><span>    Map<span style=color:#ff79c6>&lt;</span>String, Object<span style=color:#ff79c6>&gt;</span> map <span style=color:#ff79c6>=</span> scheduleService.<span style=color:#50fa7b>getScheduleRule</span>(page,limit,hoscode,depcode);
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> Result.<span style=color:#50fa7b>ok</span>(map);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h5 id=scheduleserviceimpl>ScheduleServiceImpl</h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> Map<span style=color:#ff79c6>&lt;</span>String, Object<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>getScheduleRule</span>(<span style=color:#8be9fd>long</span> page, <span style=color:#8be9fd>long</span> limit, String hoscode, String depcode) {
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//1 根据医院编号 和 科室编号 查询</span>
+</span></span><span style=display:flex><span>        Criteria criteria <span style=color:#ff79c6>=</span> Criteria.<span style=color:#50fa7b>where</span>(<span style=color:#f1fa8c>&#34;hoscode&#34;</span>).<span style=color:#50fa7b>is</span>(hoscode).<span style=color:#50fa7b>and</span>(<span style=color:#f1fa8c>&#34;depcode&#34;</span>).<span style=color:#50fa7b>is</span>(depcode);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//2 根据工作日workDate期进行分组</span>
+</span></span><span style=display:flex><span>        Aggregation agg <span style=color:#ff79c6>=</span> Aggregation.<span style=color:#50fa7b>newAggregation</span>(
+</span></span><span style=display:flex><span>                Aggregation.<span style=color:#50fa7b>match</span>(criteria),
+</span></span><span style=display:flex><span>                Aggregation.<span style=color:#50fa7b>group</span>(<span style=color:#f1fa8c>&#34;workDate&#34;</span>)
+</span></span><span style=display:flex><span>                        .<span style=color:#50fa7b>first</span>(<span style=color:#f1fa8c>&#34;workDate&#34;</span>).<span style=color:#50fa7b>as</span>(<span style=color:#f1fa8c>&#34;workDate&#34;</span>)
+</span></span><span style=display:flex><span>                        <span style=color:#6272a4>//3 统计号源数量</span>
+</span></span><span style=display:flex><span>                        .<span style=color:#50fa7b>count</span>().<span style=color:#50fa7b>as</span>(<span style=color:#f1fa8c>&#34;docCount&#34;</span>)
+</span></span><span style=display:flex><span>                        .<span style=color:#50fa7b>sum</span>(<span style=color:#f1fa8c>&#34;reservedNumber&#34;</span>).<span style=color:#50fa7b>as</span>(<span style=color:#f1fa8c>&#34;reservedNumber&#34;</span>)
+</span></span><span style=display:flex><span>                        .<span style=color:#50fa7b>sum</span>(<span style=color:#f1fa8c>&#34;availableNumber&#34;</span>).<span style=color:#50fa7b>as</span>(<span style=color:#f1fa8c>&#34;availableNumber&#34;</span>),
+</span></span><span style=display:flex><span>                Aggregation.<span style=color:#50fa7b>sort</span>(Sort.<span style=color:#50fa7b>Direction</span>.<span style=color:#50fa7b>ASC</span>,<span style=color:#f1fa8c>&#34;workDate&#34;</span>),
+</span></span><span style=display:flex><span>                <span style=color:#6272a4>//4 实现分页</span>
+</span></span><span style=display:flex><span>                Aggregation.<span style=color:#50fa7b>skip</span>((page<span style=color:#ff79c6>-</span>1)<span style=color:#ff79c6>*</span>limit),
+</span></span><span style=display:flex><span>                Aggregation.<span style=color:#50fa7b>limit</span>(limit)
+</span></span><span style=display:flex><span>        );
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//调用方法，最终执行</span>
+</span></span><span style=display:flex><span>        AggregationResults<span style=color:#ff79c6>&lt;</span>BookingScheduleRuleVo<span style=color:#ff79c6>&gt;</span> aggResults <span style=color:#ff79c6>=</span> mongoTemplate.<span style=color:#50fa7b>aggregate</span>(agg, Schedule.<span style=color:#50fa7b>class</span>, BookingScheduleRuleVo.<span style=color:#50fa7b>class</span>);
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>BookingScheduleRuleVo<span style=color:#ff79c6>&gt;</span> bookingScheduleRuleVoList <span style=color:#ff79c6>=</span> aggResults.<span style=color:#50fa7b>getMappedResults</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//分组查询的总记录数</span>
+</span></span><span style=display:flex><span>        Aggregation totalAgg <span style=color:#ff79c6>=</span> Aggregation.<span style=color:#50fa7b>newAggregation</span>(
+</span></span><span style=display:flex><span>                Aggregation.<span style=color:#50fa7b>match</span>(criteria),
+</span></span><span style=display:flex><span>                Aggregation.<span style=color:#50fa7b>group</span>(<span style=color:#f1fa8c>&#34;workDate&#34;</span>)
+</span></span><span style=display:flex><span>        );
+</span></span><span style=display:flex><span>        AggregationResults<span style=color:#ff79c6>&lt;</span>BookingScheduleRuleVo<span style=color:#ff79c6>&gt;</span> totalAggResults <span style=color:#ff79c6>=</span> mongoTemplate.<span style=color:#50fa7b>aggregate</span>(totalAgg, Schedule.<span style=color:#50fa7b>class</span>, BookingScheduleRuleVo.<span style=color:#50fa7b>class</span>);
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> total <span style=color:#ff79c6>=</span> totalAggResults.<span style=color:#50fa7b>getMappedResults</span>().<span style=color:#50fa7b>size</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>//        for (BookingScheduleRuleVo bookingScheduleRuleVo : bookingScheduleRuleVoList) {</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>//            Date workDate = bookingScheduleRuleVo.getWorkDate();</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>//            String dayOfWeek = this.getDayOfWeek(new DateTime(workDate));</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>//            bookingScheduleRuleVo.setDayOfWeek(dayOfWeek);</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>//        }</span>
+</span></span><span style=display:flex><span>        bookingScheduleRuleVoList.<span style=color:#50fa7b>stream</span>().<span style=color:#50fa7b>forEach</span>(item <span style=color:#ff79c6>-&gt;</span> {
+</span></span><span style=display:flex><span>            Date workDate <span style=color:#ff79c6>=</span> item.<span style=color:#50fa7b>getWorkDate</span>();
+</span></span><span style=display:flex><span>            String dayOfWeek <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>getDayOfWeek</span>(<span style=color:#ff79c6>new</span> DateTime(workDate));
+</span></span><span style=display:flex><span>            item.<span style=color:#50fa7b>setDayOfWeek</span>(dayOfWeek);
+</span></span><span style=display:flex><span>        });
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        Map<span style=color:#ff79c6>&lt;</span>String,Object<span style=color:#ff79c6>&gt;</span> results <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> HashMap<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        results.<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;bookingScheduleRuleList&#34;</span>,bookingScheduleRuleVoList);
+</span></span><span style=display:flex><span>        results.<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;total&#34;</span>,total);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        String hosname <span style=color:#ff79c6>=</span> hospitalService.<span style=color:#50fa7b>getHospName</span>(hoscode);
+</span></span><span style=display:flex><span>        Map<span style=color:#ff79c6>&lt;</span>String,String<span style=color:#ff79c6>&gt;</span> baseMap <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> HashMap<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        baseMap.<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;hosname&#34;</span>,hosname);
+</span></span><span style=display:flex><span>        results.<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;baseMap&#34;</span>,baseMap);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> results;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> String <span style=color:#50fa7b>getDayOfWeek</span>(DateTime dateTime) {
+</span></span><span style=display:flex><span>        String dayOfWeek <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;&#34;</span>;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>switch</span> (dateTime.<span style=color:#50fa7b>getDayOfWeek</span>()) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>case</span> DateTimeConstants.<span style=color:#50fa7b>SUNDAY</span>:
+</span></span><span style=display:flex><span>                dayOfWeek <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;周日&#34;</span>;
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>break</span>;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>case</span> DateTimeConstants.<span style=color:#50fa7b>MONDAY</span>:
+</span></span><span style=display:flex><span>                dayOfWeek <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;周一&#34;</span>;
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>break</span>;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>case</span> DateTimeConstants.<span style=color:#50fa7b>TUESDAY</span>:
+</span></span><span style=display:flex><span>                dayOfWeek <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;周二&#34;</span>;
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>break</span>;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>case</span> DateTimeConstants.<span style=color:#50fa7b>WEDNESDAY</span>:
+</span></span><span style=display:flex><span>                dayOfWeek <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;周三&#34;</span>;
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>break</span>;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>case</span> DateTimeConstants.<span style=color:#50fa7b>THURSDAY</span>:
+</span></span><span style=display:flex><span>                dayOfWeek <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;周四&#34;</span>;
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>break</span>;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>case</span> DateTimeConstants.<span style=color:#50fa7b>FRIDAY</span>:
+</span></span><span style=display:flex><span>                dayOfWeek <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;周五&#34;</span>;
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>break</span>;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>case</span> DateTimeConstants.<span style=color:#50fa7b>SATURDAY</span>:
+</span></span><span style=display:flex><span>                dayOfWeek <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;周六&#34;</span>;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>default</span>:
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>break</span>;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> dayOfWeek;
+</span></span><span style=display:flex><span>    }
+</span></span></code></pre></div><h5 id=hospitalseriviceimpl>HospitalSeriviceImpl</h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> String <span style=color:#50fa7b>getHospName</span>(String hoscode) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Hospital hospital <span style=color:#ff79c6>=</span> hospitalRepository.<span style=color:#50fa7b>getHospitalByHoscode</span>(hoscode);
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>if</span>(hospital <span style=color:#ff79c6>!=</span> <span style=color:#ff79c6>null</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> hospital.<span style=color:#50fa7b>getHosname</span>();
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>null</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=排版详情>排版详情</h3><p>根据医院编号 、科室编号和工作日期，查询排班详细信息</p><h5 id=schedulecontroller-1>ScheduleController</h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>//根据医院编号 、科室编号和工作日期，查询排班详细信息</span>
+</span></span><span style=display:flex><span>@ApiOperation(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;查询排班详细信息&#34;</span>)
+</span></span><span style=display:flex><span>@GetMapping(<span style=color:#f1fa8c>&#34;getScheduleDetail/{hoscode}/{depcode}/{workDate}&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> Result <span style=color:#50fa7b>getScheduleDetail</span>( @PathVariable String hoscode,
+</span></span><span style=display:flex><span>                                 @PathVariable String depcode,
+</span></span><span style=display:flex><span>                                 @PathVariable String workDate) {
+</span></span><span style=display:flex><span>    List<span style=color:#ff79c6>&lt;</span>Schedule<span style=color:#ff79c6>&gt;</span> list <span style=color:#ff79c6>=</span> scheduleService.<span style=color:#50fa7b>getDetailSchedule</span>(hoscode,depcode,workDate);
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> Result.<span style=color:#50fa7b>ok</span>(list);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h5 id=scheduleserviceimpl-1>ScheduleServiceImpl</h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> List<span style=color:#ff79c6>&lt;</span>Schedule<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>getDetailSchedule</span>(String hoscode, String depcode, String workDate) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    List<span style=color:#ff79c6>&lt;</span>Schedule<span style=color:#ff79c6>&gt;</span> scheduleList <span style=color:#ff79c6>=</span>
+</span></span><span style=display:flex><span>            scheduleRepository.<span style=color:#50fa7b>findScheduleByHoscodeAndDepcodeAndWorkDate</span>(hoscode,depcode,<span style=color:#ff79c6>new</span> DateTime(workDate).<span style=color:#50fa7b>toDate</span>());
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//把得到list集合遍历，向设置其他值：医院名称、科室名称、日期对应星期</span>
+</span></span><span style=display:flex><span>    scheduleList.<span style=color:#50fa7b>stream</span>().<span style=color:#50fa7b>forEach</span>(item <span style=color:#ff79c6>-&gt;</span> {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>packageSchedule</span>(item);
+</span></span><span style=display:flex><span>    });
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> scheduleList;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> Schedule <span style=color:#50fa7b>packageSchedule</span>(Schedule schedule) {
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//设置医院名称</span>
+</span></span><span style=display:flex><span>    schedule.<span style=color:#50fa7b>getParam</span>().<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;hosname&#34;</span>,hospitalService.<span style=color:#50fa7b>getHospName</span>(schedule.<span style=color:#50fa7b>getHoscode</span>()));
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//设置科室名称</span>
+</span></span><span style=display:flex><span>    schedule.<span style=color:#50fa7b>getParam</span>().<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;depname&#34;</span>,departmentService.<span style=color:#50fa7b>getDepName</span>(schedule.<span style=color:#50fa7b>getHoscode</span>(),schedule.<span style=color:#50fa7b>getDepcode</span>()));
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//设置日期对应星期</span>
+</span></span><span style=display:flex><span>    schedule.<span style=color:#50fa7b>getParam</span>().<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;dayOfWeek&#34;</span>,<span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>getDayOfWeek</span>(<span style=color:#ff79c6>new</span> DateTime(schedule.<span style=color:#50fa7b>getWorkDate</span>())));
+</span></span><span style=display:flex><span>	<span style=color:#ff79c6>return</span> schedule;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h5 id=departmentserviceimpl>DepartmentServiceImpl</h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> String <span style=color:#50fa7b>getDepName</span>(String hoscode, String depcode) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Department department <span style=color:#ff79c6>=</span>
+</span></span><span style=display:flex><span>            departmentRepository.<span style=color:#50fa7b>findDepartmentByHoscodeAndDepcode</span>(hoscode,depcode);
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>if</span>(department <span style=color:#ff79c6>!=</span> <span style=color:#ff79c6>null</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> department.<span style=color:#50fa7b>getDepname</span>();
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>null</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h1 id=11-服务网关>11. 服务网关</h1><p>API网关出现的原因是微服务架构的出现，不同的微服务一般会有不同的网络地址，而外部客户端可能需要调用多个服务的接口才能完成一个业务需求，如果让客户端直接与各个微服务通信，会有以下的问题：</p><p>（1）客户端会多次请求不同的微服务，增加了客户端的复杂性。</p><p>（2）存在跨域请求，在一定场景下处理相对复杂。</p><p>（3）认证复杂，每个服务都需要独立认证。</p><p>（4）难以重构，随着项目的迭代，可能需要重新划分微服务。例如，可能将多个服务合并成一个或者将一个服务拆分成多个。如果客户端直接与微服务通信，那么重构将会很难实施。</p><p>（5）某些微服务可能使用了防火墙 / 浏览器不友好的协议，直接访问会有一定的困难。</p><h2 id=spring-cloud-gateway>Spring cloud gateway</h2><p>Spring cloud gateway是spring官方基于Spring 5.0、Spring Boot2.0和Project Reactor等技术开发的网关，Spring Cloud Gateway旨在为微服务架构提供简单、有效和统一的API路由管理方式，Spring Cloud Gateway作为Spring Cloud生态系统中的网关，目标是替代Netflix Zuul，其不仅提供统一的路由方式，并且还基于Filer链的方式提供了网关基本的功能，例如：安全、监控/埋点、限流等</p><p>![Spring cloud gateway](/img/2024-07-22-yygh-note/assets/Spring cloud gateway网关.jpg)</p><h2 id=整合网关>整合网关</h2><h3 id=依赖-1>依赖</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-xml data-lang=xml><span style=display:flex><span><span style=color:#ff79c6>&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;project</span> <span style=color:#50fa7b>xmlns=</span><span style=color:#f1fa8c>&#34;http://maven.apache.org/POM/4.0.0&#34;</span>
+</span></span><span style=display:flex><span>         <span style=color:#50fa7b>xmlns:xsi=</span><span style=color:#f1fa8c>&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span>
+</span></span><span style=display:flex><span>         <span style=color:#50fa7b>xsi:schemaLocation=</span><span style=color:#f1fa8c>&#34;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&#34;</span><span style=color:#ff79c6>&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;parent&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;artifactId&gt;</span>yygh_parent<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;groupId&gt;</span>com.atguigu<span style=color:#ff79c6>&lt;/groupId&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;version&gt;</span>0.0.1-SNAPSHOT<span style=color:#ff79c6>&lt;/version&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;/parent&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;modelVersion&gt;</span>4.0.0<span style=color:#ff79c6>&lt;/modelVersion&gt;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;artifactId&gt;</span>service_gateway<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;dependencies&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;dependency&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;groupId&gt;</span>org.springframework.cloud<span style=color:#ff79c6>&lt;/groupId&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;artifactId&gt;</span>spring-cloud-starter-gateway<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;/dependency&gt;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>&lt;!-- 服务注册 --&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;dependency&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;groupId&gt;</span>com.alibaba.cloud<span style=color:#ff79c6>&lt;/groupId&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;artifactId&gt;</span>spring-cloud-starter-alibaba-nacos-discovery<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;/dependency&gt;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;dependency&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;groupId&gt;</span>com.atguigu<span style=color:#ff79c6>&lt;/groupId&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;artifactId&gt;</span>service_util<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>&lt;version&gt;</span>0.0.1-SNAPSHOT<span style=color:#ff79c6>&lt;/version&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;/dependency&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;/dependencies&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;/project&gt;</span>
+</span></span></code></pre></div><h3 id=在resources下添加配置文件applicationproperties>在resources下添加配置文件application.properties</h3><pre tabindex=0><code>
+server.port=80
+
+spring.application.name=service-gateway
+
+
+spring.cloud.nacos.discovery.server-addr=127.0.0.1:8848
+
+
+spring.cloud.gateway.discovery.locator.enabled=true
+
+#设置路由id
+spring.cloud.gateway.routes[0].id=service-hosp
+#设置路由的uri
+spring.cloud.gateway.routes[0].uri=lb://service-hosp
+#设置路由断言，代理serviceId为auth-service的/auth/路径
+spring.cloud.gateway.routes[0].predicates= Path=/*/hosp/**
+
+
+spring.cloud.gateway.routes[1].id=service-cmn
+
+spring.cloud.gateway.routes[1].uri=lb://service-cmn
+
+spring.cloud.gateway.routes[1].predicates= Path=/*/cmn/**
+
+
+spring.cloud.gateway.routes[2].id=service-user
+
+spring.cloud.gateway.routes[2].uri=lb://service-user
+
+spring.cloud.gateway.routes[2].predicates= Path=/*/user/**
+
+
+spring.cloud.gateway.routes[3].id=service-msm
+
+spring.cloud.gateway.routes[3].uri=lb://service-msm
+
+spring.cloud.gateway.routes[3].predicates= Path=/*/msm/**
+
+
+spring.cloud.gateway.routes[4].id=service-user
+
+spring.cloud.gateway.routes[4].uri=lb://service-user
+
+spring.cloud.gateway.routes[4].predicates= Path=/*/ucenter/**
+
+
+spring.cloud.gateway.routes[5].id=service-oss
+
+spring.cloud.gateway.routes[5].uri=lb://service-oss
+
+spring.cloud.gateway.routes[5].predicates= Path=/*/oss/**
+
+
+spring.cloud.gateway.routes[6].id=service-order
+
+spring.cloud.gateway.routes[6].uri=lb://service-order
+
+spring.cloud.gateway.routes[6].predicates= Path=/*/order/**
+
+
+spring.cloud.gateway.routes[7].id=service-statistics
+
+spring.cloud.gateway.routes[7].uri=lb://service-statistics
+
+spring.cloud.gateway.routes[7].predicates= Path=/*/statistics/**
+</code></pre><h3 id=添加启动类>添加启动类</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@SpringBootApplication
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>ServerGatewayApplication</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>main</span>(String<span style=color:#ff79c6>[]</span> args) {
+</span></span><span style=display:flex><span>        SpringApplication.<span style=color:#50fa7b>run</span>(ServerGatewayApplication.<span style=color:#50fa7b>class</span>, args);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><img src=/img/2024-07-22-yygh-note/assets/Snipaste_2024-01-15_15-07-45.png alt=网关目录></p><h2 id=跨域问题>跨域问题</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Configuration
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>CorsConfig</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @Bean
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> CorsWebFilter <span style=color:#50fa7b>corsFilter</span>() {
+</span></span><span style=display:flex><span>        CorsConfiguration config <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> CorsConfiguration();
+</span></span><span style=display:flex><span>        config.<span style=color:#50fa7b>addAllowedMethod</span>(<span style=color:#f1fa8c>&#34;*&#34;</span>);
+</span></span><span style=display:flex><span>        config.<span style=color:#50fa7b>addAllowedOrigin</span>(<span style=color:#f1fa8c>&#34;*&#34;</span>);
+</span></span><span style=display:flex><span>        config.<span style=color:#50fa7b>addAllowedHeader</span>(<span style=color:#f1fa8c>&#34;*&#34;</span>);
+</span></span><span style=display:flex><span>        UrlBasedCorsConfigurationSource source <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> UrlBasedCorsConfigurationSource(<span style=color:#ff79c6>new</span> PathPatternParser());
+</span></span><span style=display:flex><span>        source.<span style=color:#50fa7b>registerCorsConfiguration</span>(<span style=color:#f1fa8c>&#34;/**&#34;</span>, config);
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>new</span> CorsWebFilter(source);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class="entry-shang text-center"><p>「真诚赞赏，手留余香」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+<span class=author><a href=https://wangzhendong20.github.io/><img src=/img/favicon.png>SleepingFace Blog</a></span><p class=tip><i></i><span>真诚赞赏，手留余香</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
+<button class="btn btn-blink" data-num=5>5元</button>
+<button class="btn btn-blink" data-num=10>10元</button>
+<button class="btn btn-blink" data-num=50>50元</button>
+<button class="btn btn-blink" data-num=100>100元</button>
+<button class="btn btn-blink" data-num=1>任意金额</button></div><div class=zs-modal-pay><button class="btn btn-bred" id=pay-text>2元</button><p>使用<span id=pay-type>微信</span>扫描二维码完成支付</p><img src=/img/reward/wechat-2.png id=pay-image></div></div><div class=zs-modal-footer><label><input type=radio name=zs-type value=wechat class=zs-type checked><span><span class=zs-wechat><img src=/img/reward/wechat-btn.png></span></label>
+<label><input type=radio name=zs-type value=alipay class=zs-type class=zs-alipay><img src=/img/reward/alipay-btn.png></span></label></div></div><script type=text/javascript src=/js/reward.js></script><hr><ul class=pager><li class=next><a href=/2024/07/22/yygh-note-1/ data-toggle=tooltip data-placement=top title=尚医通项目笔记(一)>Next
+Post &rarr;</a></li></ul></div><div class="col-lg-2 col-lg-offset-0
+visible-lg-block
+sidebar-container
+catalog-container"><div class=side-catalog><hr class="hidden-sm hidden-xs"><h5><a class=catalog-toggle href=#>CATALOG</a></h5><ul class=catalog-body></ul></div></div><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+sidebar-container"><section><hr class="hidden-sm hidden-xs"><h5><a href=/tags/>FEATURED TAGS</a></h5><div class=tags><a href=/tags/java title=java>java
+</a><a href=/tags/kafka title=kafka>kafka
+</a><a href=/tags/mongodb title=mongodb>mongodb
+</a><a href=/tags/mysql title=mysql>mysql
+</a><a href=/tags/redis title=redis>redis
+</a><a href=/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1 title=微服务>微服务</a></div></section><section><hr><h5>FRIENDS</h5><ul class=list-inline><li><a target=_blank href=https://tanxiangyuu.github.io>谭总的博客</a></li></ul></section></div></div></div></article><footer><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><ul class="list-inline text-center"><li><a href=mailto:wangzhendong20@163.com><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-envelope fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://github.com/wangzhendong20><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-github fa-stack-1x fa-inverse"></i></span></a></li><li><a href rel=alternate type=application/rss+xml title="SleepingFace Blog"><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-rss fa-stack-1x fa-inverse"></i></span></a></li></ul><p class="copyright text-muted">Copyright &copy; SleepingFace Blog 2024<br><a href=https://themes.gohugo.io/hugo-theme-cleanwhite>CleanWhite Hugo Theme</a> by <a href=https://zhaohuabing.com>Huabing</a> |
+<iframe style=margin-left:2px;margin-bottom:-5px frameborder=0 scrolling=0 width=100px height=20px src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true"></iframe></p></div></div></div></footer><script>function loadAsync(e,t){var s=document,o="script",n=s.createElement(o),i=s.getElementsByTagName(o)[0];n.src=e,t&&n.addEventListener("load",function(e){t(null,e)},!1),i.parentNode.insertBefore(n,i)}</script><script>$("#tag_cloud").length!==0&&loadAsync("/js/jquery.tagcloud.js",function(){$.fn.tagcloud.defaults={color:{start:"#bbbbee",end:"#0085a1"}},$("#tag_cloud a").tagcloud()})</script><script>loadAsync("https://cdn.jsdelivr.net/npm/fastclick@1.0.6/lib/fastclick.min.js",function(){var e=document.querySelector("nav");e&&FastClick.attach(e)})</script><script type=text/javascript>function generateCatalog(e){_containerSelector="div.post-container";var t,n,s,o,i,a=$(_containerSelector),r=a.find("h1,h2,h3,h4,h5,h6");return $(e).html(""),r.each(function(){t=$(this).prop("tagName").toLowerCase(),o="#"+$(this).prop("id"),n=$(this).text(),i=$('<a href="'+o+'" rel="nofollow">'+n+"</a>"),s=$('<li class="'+t+'_nav"></li>').append(i),$(e).append(s)}),!0}generateCatalog(".catalog-body"),$(".catalog-toggle").click(function(e){e.preventDefault(),$(".side-catalog").toggleClass("fold")}),loadAsync("/js/jquery.nav.js",function(){$(".catalog-body").onePageNav({currentClass:"active",changeHash:!1,easing:"swing",filter:"",scrollSpeed:700,scrollOffset:0,scrollThreshold:.2,begin:null,end:null,scrollChange:null,padding:80})})</script></body></html>
