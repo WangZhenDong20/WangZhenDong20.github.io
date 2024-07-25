@@ -1,0 +1,221 @@
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta property="og:site_name" content="SleepingFace Blog"><meta property="og:type" content="article"><meta property="og:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta property="twitter:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta name=title content="利用LLaMA-Factory微调Qwen2-快速入门"><meta property="og:title" content="利用LLaMA-Factory微调Qwen2-快速入门"><meta property="twitter:title" content="利用LLaMA-Factory微调Qwen2-快速入门"><meta name=description content="利用LLaMA-Factory微调Qwen2-快速入门"><meta property="og:description" content="利用LLaMA-Factory微调Qwen2-快速入门"><meta property="twitter:description" content="利用LLaMA-Factory微调Qwen2-快速入门"><meta property="twitter:card" content="summary"><meta name=keyword content="WangZhendong"><link rel="shortcut icon" href=/img/favicon.ico><title>利用LLaMA-Factory微调Qwen2-快速入门 | 王振东的博客 | WangZhendong Blog</title>
+<link rel=canonical href=/2024/07/25/2024-7-25-LLM-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/><link rel=stylesheet href=/css/bootstrap.min.css><link rel=stylesheet href=/css/hugo-theme-cleanwhite.min.css><link rel=stylesheet href=/css/zanshang.css><link rel=stylesheet href=/css/font-awesome.all.min.css><script src=/js/jquery.min.js></script><script src=/js/bootstrap.min.js></script><script src=/js/hux-blog.min.js></script><script src=/js/lazysizes.min.js></script></head><nav class="navbar navbar-default navbar-custom navbar-fixed-top"><div class=container-fluid><div class="navbar-header page-scroll"><button type=button class=navbar-toggle>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+</button>
+<a class=navbar-brand href=/>SleepingFace Blog</a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/>All Posts</a></li><li><a href=/categories/java/>java</a></li><li><a href=/categories/llm/>llm</a></li><li><a href=/archive//>ARCHIVE</a></li><li><a href=/notes//>NOTES</a></li><li><a href=/about//>ABOUT</a></li><li><a href=/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/img/home1.jpg)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/llm title=LLM>LLM</a></div><h1>利用LLaMA-Factory微调Qwen2-快速入门</h1><h2 class=subheading></h2><span class=meta>Posted by
+SleepingFace
+on
+Thursday, July 25, 2024</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+post-container"><h1 id=利用llama-factory微调qwen2-快速入门>利用LLaMA-Factory微调Qwen2-快速入门</h1><h2 id=0-qwen2系列模型基础信息>0. Qwen2系列模型基础信息</h2><p><img src=/img/2024-07-25-LLM-%e5%bf%ab%e9%80%9f%e5%85%a5%e9%97%a8/%e6%a8%a1%e5%9e%8b%e5%9f%ba%e6%9c%ac%e4%bf%a1%e6%81%af.png alt=模型基本信息></p><blockquote><p>我们将采用Qwen2-7B来进行微调</p></blockquote><h2 id=1配置环境>1.配置环境</h2><h3 id=1autodl算力云>(1)AutoDL算力云</h3><p>我们选择AutoDL服务器来训练</p><p>租用一个3090就可以训练Qwen2-7B了</p><p>基础镜像选择最新的就OK.</p><p><img src=/img/2024-07-25-LLM-%e5%bf%ab%e9%80%9f%e5%85%a5%e9%97%a8/%e5%9f%ba%e7%a1%80%e9%95%9c%e5%83%8f.png alt=基础镜像></p><h3 id=2下载qwen2的repo>(2)下载Qwen2的repo</h3><p>首先我们找到Qwen2的github仓库：https://github.com/QwenLM/Qwen2</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>git clone https://github.com/QwenLM/Qwen2.git
+</span></span></code></pre></div><p>但是我们好像并没有找到<code>requirements.txt</code>文件，只在其中找到了一个transformers的版本要求。</p><p><img src=/img/2024-07-25-LLM-%e5%bf%ab%e9%80%9f%e5%85%a5%e9%97%a8/%e9%85%8d%e7%bd%ae%e7%8e%af%e5%a2%83.png alt=模型基本信息></p><p><strong>我们可以参考GLM4的环境来配置，实测是可以匹配的。</strong></p><pre tabindex=0><code># use vllm
+# vllm&gt;=0.5.0
+
+# torch&gt;=2.3.0
+# torchvision&gt;=0.18.0
+transformers==4.40.0
+huggingface-hub&gt;=0.23.1
+sentencepiece&gt;=0.2.0
+pydantic&gt;=2.7.1
+timm&gt;=0.9.16
+tiktoken&gt;=0.7.0
+accelerate&gt;=0.30.1
+sentence_transformers&gt;=2.7.0
+
+# web demo
+gradio&gt;=4.33.0
+
+# openai demo
+openai&gt;=1.34.0
+einops&gt;=0.7.0
+sse-starlette&gt;=2.1.0
+
+# INT4
+bitsandbytes&gt;=0.43.1
+
+# PEFT model, not need if you don&#39;t use PEFT finetune model.
+# peft&gt;=0.11.0
+</code></pre><p><strong>注意其中的torch要注释掉，因为我们已经配置了torch的版本。</strong></p><p>这样我们的环境就配置好了。</p><h2 id=2下载模型文件>2.下载模型文件</h2><p>我们在魔塔社区下载模型文件，选择Qwen2-7B-Instruct进行模型下载</p><p><img src=/img/2024-07-25-LLM-%e5%bf%ab%e9%80%9f%e5%85%a5%e9%97%a8/%e6%a8%a1%e5%9e%8b%e6%96%87%e4%bb%b6.png alt=模型文件></p><p><img src=/img/2024-07-25-LLM-%e5%bf%ab%e9%80%9f%e5%85%a5%e9%97%a8/%e6%a8%a1%e5%9e%8b%e6%96%87%e4%bb%b62.png alt=模型文件></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>git lfs install
+</span></span><span style=display:flex><span>git clone https://www.modelscope.cn/qwen/Qwen2-7B-Instruct.git
+</span></span></code></pre></div><p>之后我们的模型文件就下载到服务器了。</p><h2 id=3体验demo>3.体验demo</h2><p><strong>Qwen2提高了终端demo和webdemo可以体验。</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>cd</span> /Qwen2/examples/demo
+</span></span></code></pre></div><ul><li>终端demo</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>python cli_demo.py
+</span></span></code></pre></div><ul><li>webdemo</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>python web_demo.py
+</span></span></code></pre></div><h2 id=4下载llama-factory>4.下载LLaMA-Factory</h2><p>我们找到LLaMA-Factory的github仓库https://github.com/hiyouga/LLaMA-Factory/</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>git clone https://github.com/hiyouga/LLaMA-Factory.git
+</span></span></code></pre></div><p>之后我们安装环境配置</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>pip install -e <span style=color:#f1fa8c>&#34;.[torch,metrics]&#34;</span>
+</span></span></code></pre></div><h2 id=5构建数据集>5.构建数据集</h2><p><strong>标准格式</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>[  
+</span></span><span style=display:flex><span>  {  
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&#34;instruction&#34;</span>: <span style=color:#f1fa8c>&#34;用户指令（必填）&#34;</span>,  
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&#34;input&#34;</span>: <span style=color:#f1fa8c>&#34;用户输入（选填）&#34;</span>,  
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&#34;output&#34;</span>: <span style=color:#f1fa8c>&#34;模型回答（必填）&#34;</span>,  
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&#34;system&#34;</span>: <span style=color:#f1fa8c>&#34;系统提示词（选填）&#34;</span>,  
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&#34;history&#34;</span>: [  
+</span></span><span style=display:flex><span>      [<span style=color:#f1fa8c>&#34;第一轮指令（选填）&#34;</span>, <span style=color:#f1fa8c>&#34;第一轮回答（选填）&#34;</span>],  
+</span></span><span style=display:flex><span>      [<span style=color:#f1fa8c>&#34;第二轮指令（选填）&#34;</span>, <span style=color:#f1fa8c>&#34;第二轮回答（选填）&#34;</span>]  
+</span></span><span style=display:flex><span>    ]  
+</span></span><span style=display:flex><span>  }  
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>我们这里举一个小例子：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>[
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&#34;instruction&#34;</span>: <span style=color:#f1fa8c>&#34;根据下列大白话写成正式的书面讲话稿&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&#34;input&#34;</span>: <span style=color:#f1fa8c>&#34;你们今天跟我报一个，明天再报一个，后天再报一个，每次报得都不一样&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&#34;output&#34;</span>: <span style=color:#f1fa8c>&#34;要坚持实事求是，不做弄虚佳作的“走修型”干部。&#34;</span>
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>我们通过这种格式构建完数据集后，<strong>把json文件放到data文件夹</strong></p><p>之后我们需要在data_json文件夹中加入这个数据集</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span><span style=color:#f1fa8c>&#34;Your dataset name&#34;</span>: {
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&#34;file_name&#34;</span>: <span style=color:#f1fa8c>&#34;Your dataset name.json&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&#34;columns&#34;</span>: {
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>&#34;prompt&#34;</span>: <span style=color:#f1fa8c>&#34;instruction&#34;</span>,
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>&#34;query&#34;</span>: <span style=color:#f1fa8c>&#34;input&#34;</span>,
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>&#34;response&#34;</span>: <span style=color:#f1fa8c>&#34;output&#34;</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  },
+</span></span></code></pre></div><p>至此，数据集的构建就完成了。</p><h2 id=6开始训练>6.开始训练！</h2><h3 id=可视化界面>可视化界面</h3><p>我们输入命令进去可视化界面</p><pre tabindex=0><code class=language-she data-lang=she>llamafactory-cli webui
+</code></pre><p>![LLAMA Board](/img/2024-07-25-LLM-快速入门/LLAMA Board.png)</p><h3 id=训练关键参数>训练关键参数</h3><ul><li><p>模型名称：选择Qwen2-7B-Chat</p></li><li><p>模型路径：选择你的模型路径（我这里是/root/autodl-tmp/Qwen2/Qwen2-7B-Instruct）</p></li><li><p>微调方法：Lora</p></li><li><p>数据集：选择自己构建的数据集（我这里是NL2Speech）</p></li></ul><p>可以点击预览看到数据集</p><p><img src=/img/2024-07-25-LLM-%e5%bf%ab%e9%80%9f%e5%85%a5%e9%97%a8/%e9%a2%84%e8%a7%88%e6%95%b0%e6%8d%ae%e9%9b%86.png alt=预览数据集></p><ul><li>训练轮数：30.0</li><li>批处理大小(batch_size)：2</li><li>验证集比例</li></ul><p>![LLAMA Board2](/img/2024-07-25-LLM-快速入门/LLAMA Board2.png)</p><p>之后我们点击<strong>预览命令</strong>就可以看到具体的命令。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>llamafactory-cli train <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --stage sft <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --do_train True <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --model_name_or_path /root/autodl-tmp/Qwen2/Qwen2-7B-Instruct <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --preprocessing_num_workers <span style=color:#bd93f9>16</span> <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --finetuning_type lora <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --quantization_method bitsandbytes <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --template qwen <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --flash_attn auto <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --dataset_dir data <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --dataset NL2Speech <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --cutoff_len <span style=color:#bd93f9>1024</span> <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --learning_rate 5e-05 <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --num_train_epochs 30.0 <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --max_samples <span style=color:#bd93f9>100000</span> <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --per_device_train_batch_size <span style=color:#bd93f9>2</span> <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --gradient_accumulation_steps <span style=color:#bd93f9>8</span> <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --lr_scheduler_type cosine <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --max_grad_norm 1.0 <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --logging_steps <span style=color:#bd93f9>5</span> <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --save_steps <span style=color:#bd93f9>100</span> <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --warmup_steps <span style=color:#bd93f9>0</span> <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --optim adamw_torch <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --packing False <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --report_to none <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --output_dir saves/Qwen2-7B-Chat/lora/train_2024-07-25-20-43-13 <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --bf16 True <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --plot_loss True <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --ddp_timeout <span style=color:#bd93f9>180000000</span> <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --include_num_input_tokens_seen True <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --lora_rank <span style=color:#bd93f9>8</span> <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --lora_alpha <span style=color:#bd93f9>16</span> <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --lora_dropout <span style=color:#bd93f9>0</span> <span style=color:#f1fa8c>\
+</span></span></span><span style=display:flex><span><span style=color:#f1fa8c></span>    --lora_target all
+</span></span></code></pre></div><p>之后点击<strong>保存训练参数</strong>和<strong>载入训练参数</strong></p><h3 id=训练>训练</h3><p>点击<strong>开始</strong>就训练了！</p><p><img src=/img/2024-07-25-LLM-%e5%bf%ab%e9%80%9f%e5%85%a5%e9%97%a8/%e8%ae%ad%e7%bb%83.png alt=训练></p><p>我们可以查看训练所占用的显存，大概占用16个G左右。</p><p><img src=/img/2024-07-25-LLM-%e5%bf%ab%e9%80%9f%e5%85%a5%e9%97%a8/CUDA.png alt=显存></p><p>之后等到训练结束。</p><p><img src=/img/2024-07-25-LLM-%e5%bf%ab%e9%80%9f%e5%85%a5%e9%97%a8/%e8%ae%ad%e7%bb%83%e7%bb%93%e6%9d%9f.png alt=训练结束></p><h3 id=检测训练成果>检测训练成果</h3><p>我们加入<strong>检查点路径</strong>和点击<strong>Chat</strong>，之后<strong>加载模型</strong>，就可以进行对话来检测训练成果了。</p><p>![Chat](/img/2024-07-25-LLM-快速入门/Chat demo.png)</p><h2 id=7导出>7.导出</h2><p>点击<strong>Export</strong>，选择自己的<strong>导出目录</strong>，之后<strong>开始导出</strong>。</p><p><img src=/img/2024-07-25-LLM-%e5%bf%ab%e9%80%9f%e5%85%a5%e9%97%a8/%e5%af%bc%e5%87%ba.png alt=导出></p><p>等待导出完成后就会出现在导出目录中了。</p><h2 id=8体验demo>8.体验Demo</h2><p>我们返回到Qwen2的demo文件里。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>cd</span> /Qwen2/examples/demo
+</span></span></code></pre></div><p>我们修改<strong>web_demo.py</strong>文件，将<code>DEFAULT_CKPT_PATH</code>设置为自己的路径。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span>DEFAULT_CKPT_PATH <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#39;/root/autodl-tmp/Qwen2/outputs/SleepingFace Test&#39;</span>
+</span></span></code></pre></div><p>之后执行<strong>web_demo.py</strong>文件，就可以体验自己微调好的模型了。</p><pre tabindex=0><code class=language-she data-lang=she>python web_demo.py
+</code></pre><p>这里给出一个可以streamlit构建的demo文件。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#ff79c6>import</span> json
+</span></span><span style=display:flex><span><span style=color:#ff79c6>import</span> torch
+</span></span><span style=display:flex><span><span style=color:#ff79c6>import</span> streamlit <span style=color:#ff79c6>as</span> st
+</span></span><span style=display:flex><span><span style=color:#ff79c6>from</span> transformers <span style=color:#ff79c6>import</span> AutoModelForCausalLM, AutoTokenizer
+</span></span><span style=display:flex><span><span style=color:#ff79c6>from</span> transformers.generation.utils <span style=color:#ff79c6>import</span> GenerationConfig
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>st<span style=color:#ff79c6>.</span>set_page_config(page_title<span style=color:#ff79c6>=</span><span style=color:#f1fa8c>&#34;SleepingFace-Chat😴&#34;</span>)
+</span></span><span style=display:flex><span>st<span style=color:#ff79c6>.</span>title(<span style=color:#f1fa8c>&#34;SleepingFace-Chat😴&#34;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>@st.cache_resource
+</span></span><span style=display:flex><span><span style=color:#ff79c6>def</span> <span style=color:#50fa7b>init_model</span>():
+</span></span><span style=display:flex><span>    model <span style=color:#ff79c6>=</span> AutoModelForCausalLM<span style=color:#ff79c6>.</span>from_pretrained(
+</span></span><span style=display:flex><span>        <span style=color:#f1fa8c>&#34;/root/autodl-tmp/Qwen2/outputs/SleepingFace v2&#34;</span>,
+</span></span><span style=display:flex><span>        torch_dtype<span style=color:#ff79c6>=</span>torch<span style=color:#ff79c6>.</span>float16,
+</span></span><span style=display:flex><span>        device_map<span style=color:#ff79c6>=</span><span style=color:#f1fa8c>&#34;auto&#34;</span>,
+</span></span><span style=display:flex><span>        trust_remote_code<span style=color:#ff79c6>=</span><span style=color:#ff79c6>True</span>
+</span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>    model<span style=color:#ff79c6>.</span>generation_config <span style=color:#ff79c6>=</span> GenerationConfig<span style=color:#ff79c6>.</span>from_pretrained(
+</span></span><span style=display:flex><span>        <span style=color:#f1fa8c>&#34;/root/autodl-tmp/Qwen2/outputs/SleepingFace v2&#34;</span>
+</span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>    tokenizer <span style=color:#ff79c6>=</span> AutoTokenizer<span style=color:#ff79c6>.</span>from_pretrained(
+</span></span><span style=display:flex><span>        <span style=color:#f1fa8c>&#34;/root/autodl-tmp/Qwen2/outputs/SleepingFace v2&#34;</span>,
+</span></span><span style=display:flex><span>        use_fast<span style=color:#ff79c6>=</span><span style=color:#ff79c6>False</span>,
+</span></span><span style=display:flex><span>        trust_remote_code<span style=color:#ff79c6>=</span><span style=color:#ff79c6>True</span>
+</span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> model, tokenizer
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>def</span> <span style=color:#50fa7b>clear_chat_history</span>():
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>del</span> st<span style=color:#ff79c6>.</span>session_state<span style=color:#ff79c6>.</span>messages
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>def</span> <span style=color:#50fa7b>init_chat_history</span>():
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>with</span> st<span style=color:#ff79c6>.</span>chat_message(<span style=color:#f1fa8c>&#34;assistant&#34;</span>, avatar<span style=color:#ff79c6>=</span><span style=color:#f1fa8c>&#39;🤖&#39;</span>):
+</span></span><span style=display:flex><span>        st<span style=color:#ff79c6>.</span>markdown(<span style=color:#f1fa8c>&#34;您好，我是SleepingFace小助手，很高兴为您服务😴&#34;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>if</span> <span style=color:#f1fa8c>&#34;messages&#34;</span> <span style=color:#ff79c6>in</span> st<span style=color:#ff79c6>.</span>session_state:
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> message <span style=color:#ff79c6>in</span> st<span style=color:#ff79c6>.</span>session_state<span style=color:#ff79c6>.</span>messages:
+</span></span><span style=display:flex><span>            avatar <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#39;😴&#39;</span> <span style=color:#ff79c6>if</span> message[<span style=color:#f1fa8c>&#34;role&#34;</span>] <span style=color:#ff79c6>==</span> <span style=color:#f1fa8c>&#34;user&#34;</span> <span style=color:#ff79c6>else</span> <span style=color:#f1fa8c>&#39;🤖&#39;</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>with</span> st<span style=color:#ff79c6>.</span>chat_message(message[<span style=color:#f1fa8c>&#34;role&#34;</span>], avatar<span style=color:#ff79c6>=</span>avatar):
+</span></span><span style=display:flex><span>                st<span style=color:#ff79c6>.</span>markdown(message[<span style=color:#f1fa8c>&#34;content&#34;</span>])
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>else</span>:
+</span></span><span style=display:flex><span>        st<span style=color:#ff79c6>.</span>session_state<span style=color:#ff79c6>.</span>messages <span style=color:#ff79c6>=</span> []
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> st<span style=color:#ff79c6>.</span>session_state<span style=color:#ff79c6>.</span>messages
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>def</span> <span style=color:#50fa7b>generate_response</span>(model, tokenizer, messages):
+</span></span><span style=display:flex><span>    <span style=color:#6272a4># Prepare the input text by concatenating all messages</span>
+</span></span><span style=display:flex><span>    input_text <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>for</span> message <span style=color:#ff79c6>in</span> messages:
+</span></span><span style=display:flex><span>        role <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;User&#34;</span> <span style=color:#ff79c6>if</span> message[<span style=color:#f1fa8c>&#34;role&#34;</span>] <span style=color:#ff79c6>==</span> <span style=color:#f1fa8c>&#34;user&#34;</span> <span style=color:#ff79c6>else</span> <span style=color:#f1fa8c>&#34;Assistant&#34;</span>
+</span></span><span style=display:flex><span>        input_text <span style=color:#ff79c6>+=</span> <span style=color:#f1fa8c>f</span><span style=color:#f1fa8c>&#34;</span><span style=color:#f1fa8c>{</span>role<span style=color:#f1fa8c>}</span><span style=color:#f1fa8c>: </span><span style=color:#f1fa8c>{</span>message[<span style=color:#f1fa8c>&#39;content&#39;</span>]<span style=color:#f1fa8c>}</span><span style=color:#f1fa8c>\n</span><span style=color:#f1fa8c>&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4># Encode the input text</span>
+</span></span><span style=display:flex><span>    inputs <span style=color:#ff79c6>=</span> tokenizer<span style=color:#ff79c6>.</span>encode(input_text, return_tensors<span style=color:#ff79c6>=</span><span style=color:#f1fa8c>&#34;pt&#34;</span>)<span style=color:#ff79c6>.</span>to(model<span style=color:#ff79c6>.</span>device)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4># Generate a response</span>
+</span></span><span style=display:flex><span>    outputs <span style=color:#ff79c6>=</span> model<span style=color:#ff79c6>.</span>generate(inputs, max_length<span style=color:#ff79c6>=</span><span style=color:#bd93f9>6000</span>, do_sample<span style=color:#ff79c6>=</span><span style=color:#ff79c6>True</span>)
+</span></span><span style=display:flex><span>    response <span style=color:#ff79c6>=</span> tokenizer<span style=color:#ff79c6>.</span>decode(outputs[<span style=color:#bd93f9>0</span>], skip_special_tokens<span style=color:#ff79c6>=</span><span style=color:#ff79c6>True</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4># Extract the assistant&#39;s response part</span>
+</span></span><span style=display:flex><span>    response <span style=color:#ff79c6>=</span> response<span style=color:#ff79c6>.</span>split(<span style=color:#f1fa8c>&#34;Assistant:&#34;</span>)[<span style=color:#ff79c6>-</span><span style=color:#bd93f9>1</span>]<span style=color:#ff79c6>.</span>strip()
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> response
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>def</span> <span style=color:#50fa7b>main</span>():
+</span></span><span style=display:flex><span>    model, tokenizer <span style=color:#ff79c6>=</span> init_model()
+</span></span><span style=display:flex><span>    messages <span style=color:#ff79c6>=</span> init_chat_history()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>if</span> prompt <span style=color:#ff79c6>:=</span> st<span style=color:#ff79c6>.</span>chat_input(<span style=color:#f1fa8c>&#34;Shift + Enter 换行, Enter 发送&#34;</span>):
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>with</span> st<span style=color:#ff79c6>.</span>chat_message(<span style=color:#f1fa8c>&#34;user&#34;</span>, avatar<span style=color:#ff79c6>=</span><span style=color:#f1fa8c>&#39;😴&#39;</span>):
+</span></span><span style=display:flex><span>            st<span style=color:#ff79c6>.</span>markdown(prompt)
+</span></span><span style=display:flex><span>        messages<span style=color:#ff79c6>.</span>append({<span style=color:#f1fa8c>&#34;role&#34;</span>: <span style=color:#f1fa8c>&#34;user&#34;</span>, <span style=color:#f1fa8c>&#34;content&#34;</span>: prompt})
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>print</span>(<span style=color:#f1fa8c>f</span><span style=color:#f1fa8c>&#34;[user] </span><span style=color:#f1fa8c>{</span>prompt<span style=color:#f1fa8c>}</span><span style=color:#f1fa8c>&#34;</span>, flush<span style=color:#ff79c6>=</span><span style=color:#ff79c6>True</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>with</span> st<span style=color:#ff79c6>.</span>chat_message(<span style=color:#f1fa8c>&#34;assistant&#34;</span>, avatar<span style=color:#ff79c6>=</span><span style=color:#f1fa8c>&#39;🤖&#39;</span>):
+</span></span><span style=display:flex><span>            placeholder <span style=color:#ff79c6>=</span> st<span style=color:#ff79c6>.</span>empty()
+</span></span><span style=display:flex><span>            response <span style=color:#ff79c6>=</span> generate_response(model, tokenizer, messages)
+</span></span><span style=display:flex><span>            placeholder<span style=color:#ff79c6>.</span>markdown(response)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        messages<span style=color:#ff79c6>.</span>append({<span style=color:#f1fa8c>&#34;role&#34;</span>: <span style=color:#f1fa8c>&#34;assistant&#34;</span>, <span style=color:#f1fa8c>&#34;content&#34;</span>: response})
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>print</span>(json<span style=color:#ff79c6>.</span>dumps(messages, ensure_ascii<span style=color:#ff79c6>=</span><span style=color:#ff79c6>False</span>), flush<span style=color:#ff79c6>=</span><span style=color:#ff79c6>True</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        st<span style=color:#ff79c6>.</span>button(<span style=color:#f1fa8c>&#34;清空对话&#34;</span>, on_click<span style=color:#ff79c6>=</span>clear_chat_history)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>if</span> __name__ <span style=color:#ff79c6>==</span> <span style=color:#f1fa8c>&#34;__main__&#34;</span>:
+</span></span><span style=display:flex><span>    main()
+</span></span></code></pre></div><p>之后还在该目录下执行</p><pre tabindex=0><code class=language-she data-lang=she>streamlit run web_demo_streamlit.py --server.port 6006
+</code></pre><p><img src=/img/2024-07-25-LLM-%e5%bf%ab%e9%80%9f%e5%85%a5%e9%97%a8/demo.png alt=demo></p><p>我们可以开始对话检查刚刚训练的成果。</p><p><img src=/img/2024-07-25-LLM-%e5%bf%ab%e9%80%9f%e5%85%a5%e9%97%a8/demo2.png alt=demo></p><p>至此就完成快速入门啦！</p><p>如果您遇到问题请在评论区评论！</p><div class="entry-shang text-center"><p>「给个赞赏，支持一下作者吧~」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+<span class=author><a href=https://wangzhendong20.github.io/><img src=/img/favicon.png>SleepingFace Blog</a></span><p class=tip><i></i><span>给个赞赏，支持一下作者吧~</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
+<button class="btn btn-blink" data-num=5>5元</button>
+<button class="btn btn-blink" data-num=10>10元</button>
+<button class="btn btn-blink" data-num=50>50元</button>
+<button class="btn btn-blink" data-num=100>100元</button>
+<button class="btn btn-blink" data-num=1>任意金额</button></div><div class=zs-modal-pay><button class="btn btn-bred" id=pay-text>2元</button><p>使用<span id=pay-type>微信</span>扫描二维码完成支付</p><img src=/img/reward/wechat-2.png id=pay-image></div></div><div class=zs-modal-footer><label><input type=radio name=zs-type value=wechat class=zs-type checked><span><span class=zs-wechat><img src=/img/reward/wechat-btn.png></span></label>
+<label><input type=radio name=zs-type value=alipay class=zs-type class=zs-alipay><img src=/img/reward/alipay-btn.png></span></label></div></div><script type=text/javascript src=/js/reward.js></script><hr><ul class=pager><li class=previous><a href=/2024/07/23/leetcode-note/ data-toggle=tooltip data-placement=top title=代码随想录+leetcode笔记>&larr;
+Previous Post</a></li></ul><script src=https://giscus.app/client.js data-repo=wangzhendong20/wangzhendong20.github.io data-repo-id=***************************** data-category=**************************** data-category-id=************************** data-mapping=pathname data-reactions-enabled=1 data-emit-metadata=0 data-theme=light data-lang=en crossorigin=anonymous async></script></div><div class="col-lg-2 col-lg-offset-0
+visible-lg-block
+sidebar-container
+catalog-container"><div class=side-catalog><hr class="hidden-sm hidden-xs"><h5><a class=catalog-toggle href=#>CATALOG</a></h5><ul class=catalog-body></ul></div></div><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+sidebar-container"><section><hr class="hidden-sm hidden-xs"><h5><a href=/tags/>FEATURED TAGS</a></h5><div class=tags></div></section><section><hr><h5>FRIENDS</h5><ul class=list-inline><li><a target=_blank href=https://tanxiangyuu.github.io>谭总的博客</a></li></ul></section></div></div></div></article><footer><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><ul class="list-inline text-center"><li><a href=mailto:wangzhendong20@163.com><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-envelope fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://github.com/wangzhendong20><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-github fa-stack-1x fa-inverse"></i></span></a></li><li><a href rel=alternate type=application/rss+xml title="SleepingFace Blog"><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-rss fa-stack-1x fa-inverse"></i></span></a></li></ul><p class="copyright text-muted">&copy; SleepingFace Blog 2024<br><a>转载请注明出处哦！</a></p></div></div></div></footer><script>function loadAsync(e,t){var s=document,o="script",n=s.createElement(o),i=s.getElementsByTagName(o)[0];n.src=e,t&&n.addEventListener("load",function(e){t(null,e)},!1),i.parentNode.insertBefore(n,i)}</script><script>$("#tag_cloud").length!==0&&loadAsync("/js/jquery.tagcloud.js",function(){$.fn.tagcloud.defaults={color:{start:"#bbbbee",end:"#0085a1"}},$("#tag_cloud a").tagcloud()})</script><script>loadAsync("https://cdn.jsdelivr.net/npm/fastclick@1.0.6/lib/fastclick.min.js",function(){var e=document.querySelector("nav");e&&FastClick.attach(e)})</script><script>(function(){var t,e=document.createElement("script"),n=window.location.protocol.split(":")[0];n==="https"?e.src="https://zz.bdstatic.com/linksubmit/push.js":e.src="http://push.zhanzhang.baidu.com/push.js",t=document.getElementsByTagName("script")[0],t.parentNode.insertBefore(e,t)})()</script><script>var _baId="8cc115b1ee28b68ce1138a4281875e00",_hmt=_hmt||[];(function(){var e,t=document.createElement("script");t.src="//hm.baidu.com/hm.js?"+_baId,e=document.getElementsByTagName("script")[0],e.parentNode.insertBefore(t,e)})()</script><script type=text/javascript>function generateCatalog(e){_containerSelector="div.post-container";var t,n,s,o,i,a=$(_containerSelector),r=a.find("h1,h2,h3,h4,h5,h6");return $(e).html(""),r.each(function(){t=$(this).prop("tagName").toLowerCase(),o="#"+$(this).prop("id"),n=$(this).text(),i=$('<a href="'+o+'" rel="nofollow">'+n+"</a>"),s=$('<li class="'+t+'_nav"></li>').append(i),$(e).append(s)}),!0}generateCatalog(".catalog-body"),$(".catalog-toggle").click(function(e){e.preventDefault(),$(".side-catalog").toggleClass("fold")}),loadAsync("/js/jquery.nav.js",function(){$(".catalog-body").onePageNav({currentClass:"active",changeHash:!1,easing:"swing",filter:"",scrollSpeed:700,scrollOffset:0,scrollThreshold:.2,begin:null,end:null,scrollChange:null,padding:80})})</script></body></html>
