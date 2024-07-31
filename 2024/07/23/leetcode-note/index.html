@@ -2694,7 +2694,65 @@ for (int i = 0; i &lt; numCourses; i++) {
 </span></span><span style=display:flex><span>    <span style=color:#ff79c6>if</span> (u <span style=color:#ff79c6>==</span> v) <span style=color:#ff79c6>return</span>;
 </span></span><span style=display:flex><span>    father<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> u;
 </span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h2 id=1014--dfsbfs有向图有环问题---拓扑排序>10.1.4 DFS/BFS有向图有环问题 拓扑排序</h2><h3 id=经典题207-课程表httpsleetcodecnproblemscourse-schedule>经典题：<a href=https://leetcode.cn/problems/course-schedule/>207. 课程表</a></h3><h4 id=dfs判断是否有环>DFS判断是否有环</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd>boolean</span><span style=color:#ff79c6>[]</span> visited;  <span style=color:#6272a4>//是否访问过该节点</span>
+</span></span></code></pre></div><h2 id=1014--dfsbfs有向图有环问题---拓扑排序>10.1.4 DFS/BFS有向图有环问题 拓扑排序</h2><h3 id=拓扑排序的过程>拓扑排序的过程</h3><ol><li>找到入度为0 的节点，加入结果集</li><li>将该节点从图中移除</li></ol><p>循环以上两步，直到 所有节点都在图中被移除了。</p><h3 id=判断是否有环>判断是否有环</h3><p>如果我们发现结果集元素个数 不等于 图中节点个数，我们就可以认定图中一定有 有向环！</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#ff79c6>package</span> base;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>import</span> java.util.*;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>TuoPu</span> {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>main</span>(String<span style=color:#ff79c6>[]</span> args) {
+</span></span><span style=display:flex><span>        Scanner scanner <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Scanner(System.<span style=color:#50fa7b>in</span>);
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> n <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> m <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;&gt;</span> map <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;</span>List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;&gt;</span>(); <span style=color:#6272a4>//记录依赖关系</span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> indegree <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n<span style=color:#ff79c6>]</span>; <span style=color:#6272a4>//记录每个节点的入度</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> n; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            map.<span style=color:#50fa7b>add</span>(<span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span>());
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> m; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> from <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> to <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            map.<span style=color:#50fa7b>get</span>(from).<span style=color:#50fa7b>add</span>(to); <span style=color:#6272a4>// 记录指向哪些节点</span>
+</span></span><span style=display:flex><span>            indegree<span style=color:#ff79c6>[</span>to<span style=color:#ff79c6>]++</span>; <span style=color:#6272a4>// to的入度加一</span>
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        Deque<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> queue <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> LinkedList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> n; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (indegree<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> 0) { <span style=color:#6272a4>// 入度为0的文件，可以作为开头，先加入队列</span>
+</span></span><span style=display:flex><span>                queue.<span style=color:#50fa7b>offer</span>(i);
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> result <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 拓扑排序</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>while</span> (<span style=color:#ff79c6>!</span>queue.<span style=color:#50fa7b>isEmpty</span>()) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> cur <span style=color:#ff79c6>=</span> queue.<span style=color:#50fa7b>poll</span>();<span style=color:#6272a4>// 当前选中的节点</span>
+</span></span><span style=display:flex><span>            result.<span style=color:#50fa7b>add</span>(cur);
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (Integer node : map.<span style=color:#50fa7b>get</span>(cur)) {
+</span></span><span style=display:flex><span>                indegree<span style=color:#ff79c6>[</span>node<span style=color:#ff79c6>]--</span>; <span style=color:#6272a4>// cur的指向的节点入度-1</span>
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (indegree<span style=color:#ff79c6>[</span>node<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> 0) {
+</span></span><span style=display:flex><span>                    queue.<span style=color:#50fa7b>offer</span>(node);
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (result.<span style=color:#50fa7b>size</span>() <span style=color:#ff79c6>==</span> n) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> result.<span style=color:#50fa7b>size</span>(); i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>                System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(result.<span style=color:#50fa7b>get</span>(i));
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (i <span style=color:#ff79c6>&lt;</span> result.<span style=color:#50fa7b>size</span>() <span style=color:#ff79c6>-</span> 1) {
+</span></span><span style=display:flex><span>                    System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(<span style=color:#f1fa8c>&#34; &#34;</span>);
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>            System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(<span style=color:#ff79c6>-</span>1);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=经典题207-课程表httpsleetcodecnproblemscourse-schedule>经典题：<a href=https://leetcode.cn/problems/course-schedule/>207. 课程表</a></h3><h4 id=dfs判断是否有环>DFS判断是否有环</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd>boolean</span><span style=color:#ff79c6>[]</span> visited;  <span style=color:#6272a4>//是否访问过该节点</span>
 </span></span><span style=display:flex><span><span style=color:#8be9fd>boolean</span><span style=color:#ff79c6>[]</span> onPath;  <span style=color:#6272a4>//// 记录一次递归堆栈中的节点  记录当前 traverse 经过的路径</span>
 </span></span><span style=display:flex><span><span style=color:#8be9fd>boolean</span> hasCycle <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>false</span>; <span style=color:#6272a4>// 记录图中是否有环</span>
 </span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>boolean</span> <span style=color:#50fa7b>canFinish</span>(<span style=color:#8be9fd>int</span> numCourses, <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> prerequisites) {
@@ -2894,7 +2952,71 @@ for (int i = 0; i &lt; numCourses; i++) {
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> res;
 </span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h2 id=1015-二分图>10.1.5 二分图</h2><h2 id=1016-pirm算法和kruskal算法>10.1.6 Pirm算法和Kruskal算法</h2><h3 id=pirm算法模板>Pirm算法模板</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Prim</span> {
+</span></span></code></pre></div><h2 id=1015-二分图>10.1.5 二分图</h2><h2 id=1016-pirm算法和kruskal算法>10.1.6 Pirm算法和Kruskal算法</h2><h3 id=pirm算法模板>Pirm算法模板</h3><p><strong>用minDist数组来记录每次的最近边</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#ff79c6>import</span> java.util.Arrays;
+</span></span><span style=display:flex><span><span style=color:#ff79c6>import</span> java.util.Scanner;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>KM53</span> {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>main</span>(String<span style=color:#ff79c6>[]</span> args) {
+</span></span><span style=display:flex><span>        Scanner sc <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Scanner(System.<span style=color:#50fa7b>in</span>);
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> V <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> E <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> graph <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>V<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>][</span>V<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;=</span> V; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            Arrays.<span style=color:#50fa7b>fill</span>(graph<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>, 10001);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> E; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> from  <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> to   <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> k <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            graph<span style=color:#ff79c6>[</span>from<span style=color:#ff79c6>][</span>to<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> k;
+</span></span><span style=display:flex><span>            graph<span style=color:#ff79c6>[</span>to<span style=color:#ff79c6>][</span>from<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> k;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//记录最小生成树</span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> parent <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>V<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        Arrays.<span style=color:#50fa7b>fill</span>(parent, <span style=color:#ff79c6>-</span>1);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> minDist <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>V<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        Arrays.<span style=color:#50fa7b>fill</span>(minDist,10001);
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>boolean</span><span style=color:#ff79c6>[]</span> visited <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>boolean</span><span style=color:#ff79c6>[</span>V<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 1; i <span style=color:#ff79c6>&lt;</span> V; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 1、prim三部曲，第一步：选距离生成树最近节点</span>
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> cur <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>-</span>1;
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> minVal <span style=color:#ff79c6>=</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span>;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> j <span style=color:#ff79c6>=</span> 1; j <span style=color:#ff79c6>&lt;=</span> V; j<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (<span style=color:#ff79c6>!</span>visited<span style=color:#ff79c6>[</span>j<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&amp;&amp;</span> minDist<span style=color:#ff79c6>[</span>j<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&lt;</span> minVal) {
+</span></span><span style=display:flex><span>                    minVal <span style=color:#ff79c6>=</span> minDist<span style=color:#ff79c6>[</span>j<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>                    cur <span style=color:#ff79c6>=</span> j;
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 2、prim三部曲，第二步：最近节点（cur）加入生成树</span>
+</span></span><span style=display:flex><span>            visited<span style=color:#ff79c6>[</span>cur<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>true</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 3、prim三部曲，第三步：更新非生成树节点到生成树的距离（即更新minDist数组）</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> j <span style=color:#ff79c6>=</span> 1; j <span style=color:#ff79c6>&lt;=</span> V; j<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (<span style=color:#ff79c6>!</span>visited<span style=color:#ff79c6>[</span>j<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&amp;&amp;</span> graph<span style=color:#ff79c6>[</span>cur<span style=color:#ff79c6>][</span>j<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&lt;</span> minDist<span style=color:#ff79c6>[</span>j<span style=color:#ff79c6>]</span>) {
+</span></span><span style=display:flex><span>                    minDist<span style=color:#ff79c6>[</span>j<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> graph<span style=color:#ff79c6>[</span>cur<span style=color:#ff79c6>][</span>j<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>                    parent<span style=color:#ff79c6>[</span>j<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> cur; <span style=color:#6272a4>// 记录最小生成树的边 （注意数组指向的顺序很重要）</span>
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> res <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 2; i <span style=color:#ff79c6>&lt;=</span> V; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            res <span style=color:#ff79c6>+=</span> minDist<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 输出 最小生成树边的链接情况</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 1; i <span style=color:#ff79c6>&lt;=</span> V; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(i <span style=color:#ff79c6>+</span> <span style=color:#f1fa8c>&#34;-&gt;&#34;</span> <span style=color:#ff79c6>+</span> parent<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(res);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><strong>用堆来记录最近边</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Prim</span> {
 </span></span><span style=display:flex><span>    <span style=color:#6272a4>// 核心数据结构，存储「横切边」的优先级队列</span>
 </span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> PriorityQueue<span style=color:#ff79c6>&lt;</span><span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]&gt;</span> pq;
 </span></span><span style=display:flex><span>    <span style=color:#6272a4>// 类似 visited 数组的作用，记录哪些节点已经成为最小生成树的一部分</span>
@@ -2967,7 +3089,92 @@ for (int i = 0; i &lt; numCourses; i++) {
 </span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>true</span>;
 </span></span><span style=display:flex><span>    }
 </span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h3 id=kruskal算法模板>Kruskal算法模板</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Kruskal</span> {
+</span></span></code></pre></div><h3 id=kruskal算法模板>Kruskal算法模板</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#ff79c6>package</span> base;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>import</span> java.util.*;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Kruskal</span> {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Edge</span> {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> src, dest, weight;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#50fa7b>Edge</span>(<span style=color:#8be9fd>int</span> src, <span style=color:#8be9fd>int</span> dest, <span style=color:#8be9fd>int</span> weight) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>src</span> <span style=color:#ff79c6>=</span> src;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>dest</span> <span style=color:#ff79c6>=</span> dest;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>weight</span> <span style=color:#ff79c6>=</span> weight;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>UF</span> {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> parent;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#50fa7b>UF</span>(<span style=color:#8be9fd>int</span> n) {
+</span></span><span style=display:flex><span>            parent <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;=</span> n; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>                parent<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> i;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>int</span> <span style=color:#50fa7b>find</span>(<span style=color:#8be9fd>int</span> u) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (u <span style=color:#ff79c6>==</span> parent<span style=color:#ff79c6>[</span>u<span style=color:#ff79c6>]</span>) <span style=color:#ff79c6>return</span> u;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>else</span> <span style=color:#ff79c6>return</span> parent<span style=color:#ff79c6>[</span>u<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> find(parent<span style=color:#ff79c6>[</span>u<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>join</span>(<span style=color:#8be9fd>int</span> u, <span style=color:#8be9fd>int</span> v) {
+</span></span><span style=display:flex><span>            u <span style=color:#ff79c6>=</span> find(u);
+</span></span><span style=display:flex><span>            v <span style=color:#ff79c6>=</span> find(v);
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (u <span style=color:#ff79c6>==</span> v) <span style=color:#ff79c6>return</span>;
+</span></span><span style=display:flex><span>            parent<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> u;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>boolean</span> <span style=color:#50fa7b>isSame</span>(<span style=color:#8be9fd>int</span> u, <span style=color:#8be9fd>int</span> v) {
+</span></span><span style=display:flex><span>            u <span style=color:#ff79c6>=</span> find(u);
+</span></span><span style=display:flex><span>            v <span style=color:#ff79c6>=</span> find(v);
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span> u <span style=color:#ff79c6>==</span> v;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>main</span>(String<span style=color:#ff79c6>[]</span> args) {
+</span></span><span style=display:flex><span>        Scanner sc <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Scanner(System.<span style=color:#50fa7b>in</span>);
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> V <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> E <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>Edge<span style=color:#ff79c6>&gt;</span> edges <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> res_val <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>Edge<span style=color:#ff79c6>&gt;</span> result <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> E; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> src <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> dest <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> weight <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            edges.<span style=color:#50fa7b>add</span>(<span style=color:#ff79c6>new</span> Edge(src, dest, weight));
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        edges.<span style=color:#50fa7b>sort</span>(Comparator.<span style=color:#50fa7b>comparingInt</span>(edge <span style=color:#ff79c6>-&gt;</span> edge.<span style=color:#50fa7b>weight</span>));<span style=color:#6272a4>// 按边的权值对边进行从小到大排序</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        UF uf <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> UF(V);
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 从头开始遍历边</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (Edge edge : edges) {
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 并查集，搜出两个节点的祖先</span>
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> x <span style=color:#ff79c6>=</span> uf.<span style=color:#50fa7b>find</span>(edge.<span style=color:#50fa7b>src</span>);
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> y <span style=color:#ff79c6>=</span> uf.<span style=color:#50fa7b>find</span>(edge.<span style=color:#50fa7b>dest</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (x <span style=color:#ff79c6>!=</span> y) {<span style=color:#6272a4>// 如果祖先不同，则不在同一个集合</span>
+</span></span><span style=display:flex><span>                result.<span style=color:#50fa7b>add</span>(edge);
+</span></span><span style=display:flex><span>                res_val <span style=color:#ff79c6>+=</span> edge.<span style=color:#50fa7b>weight</span>; <span style=color:#6272a4>// 这条边可以作为生成树的边</span>
+</span></span><span style=display:flex><span>                uf.<span style=color:#50fa7b>join</span>(x,y); <span style=color:#6272a4>// 两个节点加入到同一个集合</span>
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(res_val);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (Edge edge : result) {
+</span></span><span style=display:flex><span>            System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(edge.<span style=color:#50fa7b>src</span> <span style=color:#ff79c6>+</span> <span style=color:#f1fa8c>&#34; - &#34;</span> <span style=color:#ff79c6>+</span> edge.<span style=color:#50fa7b>dest</span> <span style=color:#ff79c6>+</span> <span style=color:#f1fa8c>&#34; : &#34;</span> <span style=color:#ff79c6>+</span> edge.<span style=color:#50fa7b>weight</span>);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Kruskal</span> {
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>int</span> <span style=color:#50fa7b>minimumCost</span>(<span style=color:#8be9fd>int</span> n, <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> connections) {
 </span></span><span style=display:flex><span>        <span style=color:#6272a4>// 城市编号为 1...n，所以初始化大小为 n + 1</span>
@@ -3035,10 +3242,74 @@ for (int i = 0; i &lt; numCourses; i++) {
 </span></span><span style=display:flex><span>        }
 </span></span><span style=display:flex><span>    }
 </span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h2 id=1017-dijkstra算法>10.1.7 Dijkstra算法</h2><h3 id=dijkstra算法模板>Dijkstra算法模板</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Dijkstra</span> {
+</span></span></code></pre></div><h2 id=1017-dijkstra算法>10.1.7 Dijkstra算法</h2><p><strong>解决单元最短路径(无负权值)问题</strong></p><h3 id=dijkstra算法模板>Dijkstra算法模板</h3><h4 id=1朴素版on2>1.朴素版O(n2)</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#ff79c6>package</span> base;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>import</span> java.util.Arrays;
+</span></span><span style=display:flex><span><span style=color:#ff79c6>import</span> java.util.Scanner;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Dijkstra</span> {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>main</span>(String<span style=color:#ff79c6>[]</span> args) {
+</span></span><span style=display:flex><span>        Scanner scanner <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Scanner(System.<span style=color:#50fa7b>in</span>);
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> n <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> m <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> grid <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n <span style=color:#ff79c6>+</span> 1<span style=color:#ff79c6>][</span>n <span style=color:#ff79c6>+</span> 1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;=</span> n; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            Arrays.<span style=color:#50fa7b>fill</span>(grid<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>, Integer.<span style=color:#50fa7b>MAX_VALUE</span>);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> m; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> p1 <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> p2 <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> val <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            grid<span style=color:#ff79c6>[</span>p1<span style=color:#ff79c6>][</span>p2<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> val;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> start <span style=color:#ff79c6>=</span> 1;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> end <span style=color:#ff79c6>=</span> n;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 存储从源点到每个节点的最短距离</span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> minDist <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n <span style=color:#ff79c6>+</span> 1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        Arrays.<span style=color:#50fa7b>fill</span>(minDist, Integer.<span style=color:#50fa7b>MAX_VALUE</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 记录顶点是否被访问过</span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>boolean</span><span style=color:#ff79c6>[]</span> visited <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>boolean</span><span style=color:#ff79c6>[</span>n <span style=color:#ff79c6>+</span> 1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        minDist<span style=color:#ff79c6>[</span>start<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> 0;  <span style=color:#6272a4>// 起始点到自身的距离为0</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 1; i <span style=color:#ff79c6>&lt;=</span> n; i<span style=color:#ff79c6>++</span>) { <span style=color:#6272a4>// 遍历所有节点</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> minVal <span style=color:#ff79c6>=</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span>;
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> cur <span style=color:#ff79c6>=</span> 1;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 1、选距离源点最近且未访问过的节点</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> v <span style=color:#ff79c6>=</span> 1; v <span style=color:#ff79c6>&lt;=</span> n; <span style=color:#ff79c6>++</span>v) {
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (<span style=color:#ff79c6>!</span>visited<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&amp;&amp;</span> minDist<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&lt;</span> minVal) {
+</span></span><span style=display:flex><span>                    minVal <span style=color:#ff79c6>=</span> minDist<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>                    cur <span style=color:#ff79c6>=</span> v;
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>            visited<span style=color:#ff79c6>[</span>cur<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>true</span>;  <span style=color:#6272a4>// 2、标记该节点已被访问</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 3、第三步，更新非访问节点到源点的距离（即更新minDist数组）</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> v <span style=color:#ff79c6>=</span> 1; v <span style=color:#ff79c6>&lt;=</span> n; v<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (<span style=color:#ff79c6>!</span>visited<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&amp;&amp;</span> grid<span style=color:#ff79c6>[</span>cur<span style=color:#ff79c6>][</span>v<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>!=</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span> <span style=color:#ff79c6>&amp;&amp;</span> minDist<span style=color:#ff79c6>[</span>cur<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> grid<span style=color:#ff79c6>[</span>cur<span style=color:#ff79c6>][</span>v<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&lt;</span> minDist<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span>) {
+</span></span><span style=display:flex><span>                    minDist<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> minDist<span style=color:#ff79c6>[</span>cur<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> grid<span style=color:#ff79c6>[</span>cur<span style=color:#ff79c6>][</span>v<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (minDist<span style=color:#ff79c6>[</span>end<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span>) {
+</span></span><span style=display:flex><span>            System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(<span style=color:#ff79c6>-</span>1); <span style=color:#6272a4>// 不能到达终点</span>
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>            System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(minDist<span style=color:#ff79c6>[</span>end<span style=color:#ff79c6>]</span>); <span style=color:#6272a4>// 到达终点最短路径</span>
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=2-堆优化版>2. 堆优化版</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Dijkstra</span> {
 </span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
 </span></span></span><span style=display:flex><span><span style=color:#6272a4>     * Dijkstra 算法
-</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 根据labuladong修改，可能存在错误
 </span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>
@@ -3101,7 +3372,263 @@ for (int i = 0; i &lt; numCourses; i++) {
 </span></span><span style=display:flex><span>    }
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h2 id=102-重点题目及出错的题目等>10.2 重点题目及出错的题目等</h2><h3 id=200-岛屿数量httpsleetcodecnproblemsnumber-of-islands模板题><a href=https://leetcode.cn/problems/number-of-islands/>200. 岛屿数量</a>（模板题）</h3><h4 id=深搜法>深搜法</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> dir <span style=color:#ff79c6>=</span> {
+</span></span></code></pre></div><h2 id=1018-bellman_ford算法>10.1.8 Bellman_ford算法</h2><h3 id=bellman_ford算法模板>Bellman_ford算法模板</h3><p><strong>解决单元最短路径(可有负权值)问题</strong></p><p>要求没有负权回路</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Bellman_ford</span> {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Edge</span> {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> src, dest, weight;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#50fa7b>Edge</span>(<span style=color:#8be9fd>int</span> src, <span style=color:#8be9fd>int</span> dest, <span style=color:#8be9fd>int</span> weight) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>src</span> <span style=color:#ff79c6>=</span> src;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>dest</span> <span style=color:#ff79c6>=</span> dest;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>weight</span> <span style=color:#ff79c6>=</span> weight;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>main</span>(String<span style=color:#ff79c6>[]</span> args) {
+</span></span><span style=display:flex><span>        Scanner sc <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Scanner(System.<span style=color:#50fa7b>in</span>);
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> n <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> m <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>Edge<span style=color:#ff79c6>&gt;</span> grid <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> m; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> src <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> dest <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> weight <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            grid.<span style=color:#50fa7b>add</span>(<span style=color:#ff79c6>new</span> Edge(src, dest, weight));
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> start <span style=color:#ff79c6>=</span> 1;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> end <span style=color:#ff79c6>=</span> n;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> minDist <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        Arrays.<span style=color:#50fa7b>fill</span>(minDist, Integer.<span style=color:#50fa7b>MAX_VALUE</span>);
+</span></span><span style=display:flex><span>        minDist<span style=color:#ff79c6>[</span>start<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 1; i <span style=color:#ff79c6>&lt;</span> n; i<span style=color:#ff79c6>++</span>) { <span style=color:#6272a4>// 对所有边 松弛 n-1 次</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (Edge edge : grid) { <span style=color:#6272a4>// 每一次松弛，都是对所有边进行松弛</span>
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> src <span style=color:#ff79c6>=</span> edge.<span style=color:#50fa7b>src</span>;
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> dest <span style=color:#ff79c6>=</span> edge.<span style=color:#50fa7b>dest</span>;
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> weight <span style=color:#ff79c6>=</span> edge.<span style=color:#50fa7b>weight</span>;
+</span></span><span style=display:flex><span>                <span style=color:#6272a4>// 松弛操作</span>
+</span></span><span style=display:flex><span>                <span style=color:#6272a4>// minDist[from] != INT_MAX 防止从未计算过的节点出发</span>
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (minDist<span style=color:#ff79c6>[</span>src<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>!=</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span> <span style=color:#ff79c6>&amp;&amp;</span> minDist<span style=color:#ff79c6>[</span>dest<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&gt;</span> minDist<span style=color:#ff79c6>[</span>src<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> weight) {
+</span></span><span style=display:flex><span>                    minDist<span style=color:#ff79c6>[</span>dest<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> minDist<span style=color:#ff79c6>[</span>src<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> weight;
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (minDist<span style=color:#ff79c6>[</span>end<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span>) {
+</span></span><span style=display:flex><span>            System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(<span style=color:#f1fa8c>&#34;unconnected&#34;</span>);
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>            System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(minDist<span style=color:#ff79c6>[</span>end<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=优化后的spfa算法>优化后的SPFA算法</h3><p><strong>只需要对 上一次松弛的时候更新过的节点作为出发节点所连接的边 进行松弛就够了</strong>。</p><p>基于以上思路，如何记录 上次松弛的时候更新过的节点呢？</p><p>用队列来记录。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>SPFA</span> {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Edge</span> {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> to;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> val;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#50fa7b>Edge</span>(<span style=color:#8be9fd>int</span> to, <span style=color:#8be9fd>int</span> val) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>to</span> <span style=color:#ff79c6>=</span> to;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>val</span> <span style=color:#ff79c6>=</span> val;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>main</span>(String<span style=color:#ff79c6>[]</span> args) {
+</span></span><span style=display:flex><span>        Scanner sc <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Scanner(System.<span style=color:#50fa7b>in</span>);
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> n <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> m <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>List<span style=color:#ff79c6>&lt;</span>Edge<span style=color:#ff79c6>&gt;&gt;</span> graph <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>(n<span style=color:#ff79c6>+</span>1);
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;=</span> n; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            graph.<span style=color:#50fa7b>add</span>(<span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;</span>Edge<span style=color:#ff79c6>&gt;</span>());
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> m; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> form <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> to <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> val <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            graph.<span style=color:#50fa7b>get</span>(form).<span style=color:#50fa7b>add</span>(<span style=color:#ff79c6>new</span> Edge(to, val));
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> start <span style=color:#ff79c6>=</span> 1;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> end <span style=color:#ff79c6>=</span> n;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> minDist <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        Arrays.<span style=color:#50fa7b>fill</span>(minDist, Integer.<span style=color:#50fa7b>MAX_VALUE</span>);
+</span></span><span style=display:flex><span>        minDist<span style=color:#ff79c6>[</span>start<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        Deque<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> queue <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> LinkedList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        queue.<span style=color:#50fa7b>add</span>(start);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>while</span> (<span style=color:#ff79c6>!</span>queue.<span style=color:#50fa7b>isEmpty</span>()) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> cur <span style=color:#ff79c6>=</span> queue.<span style=color:#50fa7b>poll</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (Edge edge : graph.<span style=color:#50fa7b>get</span>(cur)) {
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> from <span style=color:#ff79c6>=</span> cur;
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> to <span style=color:#ff79c6>=</span> edge.<span style=color:#50fa7b>to</span>;
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> val <span style=color:#ff79c6>=</span> edge.<span style=color:#50fa7b>val</span>;
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (minDist<span style=color:#ff79c6>[</span>to<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&gt;</span> minDist<span style=color:#ff79c6>[</span>from<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> val) {
+</span></span><span style=display:flex><span>                    minDist<span style=color:#ff79c6>[</span>to<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> minDist<span style=color:#ff79c6>[</span>from<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> val;
+</span></span><span style=display:flex><span>                    queue.<span style=color:#50fa7b>add</span>(to);
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (minDist<span style=color:#ff79c6>[</span>end<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span>) System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(<span style=color:#f1fa8c>&#34;unconnected&#34;</span>);
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>else</span> System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(minDist<span style=color:#ff79c6>[</span>end<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=bellman_ford判断负权回路>Bellman_ford判断负权回路</h3><p>在 bellman_ford 算法中，松弛 n-1 次所有的边 就可以求得 起点到任何节点的最短路径，松弛 n 次以上，minDist数组（记录起到到其他节点的最短距离）中的结果也不会有改变</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Bellman_ford_isCycle</span> {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Edge</span> {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> src, dest, weight;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#50fa7b>Edge</span>(<span style=color:#8be9fd>int</span> src, <span style=color:#8be9fd>int</span> dest, <span style=color:#8be9fd>int</span> weight) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>src</span> <span style=color:#ff79c6>=</span> src;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>dest</span> <span style=color:#ff79c6>=</span> dest;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>weight</span> <span style=color:#ff79c6>=</span> weight;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>main</span>(String<span style=color:#ff79c6>[]</span> args) {
+</span></span><span style=display:flex><span>        Scanner sc <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Scanner(System.<span style=color:#50fa7b>in</span>);
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> n <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> m <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>Edge<span style=color:#ff79c6>&gt;</span> grid <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> m; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> src <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> dest <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> weight <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            grid.<span style=color:#50fa7b>add</span>(<span style=color:#ff79c6>new</span> Edge(src, dest, weight));
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> start <span style=color:#ff79c6>=</span> 1;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> end <span style=color:#ff79c6>=</span> n;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> minDist <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        Arrays.<span style=color:#50fa7b>fill</span>(minDist, Integer.<span style=color:#50fa7b>MAX_VALUE</span>);
+</span></span><span style=display:flex><span>        minDist<span style=color:#ff79c6>[</span>start<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>boolean</span> flag <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>false</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 1; i <span style=color:#ff79c6>&lt;=</span> n; i<span style=color:#ff79c6>++</span>) { <span style=color:#6272a4>// 对所有边 松弛 n-1 次</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (Edge edge : grid) { <span style=color:#6272a4>// 每一次松弛，都是对所有边进行松弛</span>
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> src <span style=color:#ff79c6>=</span> edge.<span style=color:#50fa7b>src</span>;
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> dest <span style=color:#ff79c6>=</span> edge.<span style=color:#50fa7b>dest</span>;
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> weight <span style=color:#ff79c6>=</span> edge.<span style=color:#50fa7b>weight</span>;
+</span></span><span style=display:flex><span>                <span style=color:#6272a4>// 松弛操作</span>
+</span></span><span style=display:flex><span>                <span style=color:#6272a4>// minDist[from] != INT_MAX 防止从未计算过的节点出发</span>
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (i <span style=color:#ff79c6>&lt;</span> n) {
+</span></span><span style=display:flex><span>                    <span style=color:#ff79c6>if</span> (minDist<span style=color:#ff79c6>[</span>src<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>!=</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span> <span style=color:#ff79c6>&amp;&amp;</span> minDist<span style=color:#ff79c6>[</span>dest<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&gt;</span> minDist<span style=color:#ff79c6>[</span>src<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> weight) {
+</span></span><span style=display:flex><span>                        minDist<span style=color:#ff79c6>[</span>dest<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> minDist<span style=color:#ff79c6>[</span>src<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> weight;
+</span></span><span style=display:flex><span>                    }
+</span></span><span style=display:flex><span>                } <span style=color:#ff79c6>else</span> { <span style=color:#6272a4>// 多加一次松弛判断负权回路</span>
+</span></span><span style=display:flex><span>                    <span style=color:#ff79c6>if</span> (minDist<span style=color:#ff79c6>[</span>src<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>!=</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span> <span style=color:#ff79c6>&amp;&amp;</span> minDist<span style=color:#ff79c6>[</span>dest<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&gt;</span> minDist<span style=color:#ff79c6>[</span>src<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> weight) flag <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>true</span>;
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (flag) System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(<span style=color:#f1fa8c>&#34;has negative cycle&#34;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (minDist<span style=color:#ff79c6>[</span>end<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span>) {
+</span></span><span style=display:flex><span>            System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(<span style=color:#f1fa8c>&#34;unconnected&#34;</span>);
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>            System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(minDist<span style=color:#ff79c6>[</span>end<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=bellman_ford之单源有限最短路>Bellman_ford之单源有限最短路</h3><p><strong>起点最多经过k + 1 条边到达终点的最短距离。</strong></p><p>对所有边松弛一次，相当于计算 起点到达 与起点一条边相连的节点 的最短距离，那么对所有边松弛 k + 1次，就是求 起点到达 与起点k + 1条边相连的节点的 最短距离。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Bellman_ford_limit</span> {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Edge</span> {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> src, dest, weight;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#50fa7b>Edge</span>(<span style=color:#8be9fd>int</span> src, <span style=color:#8be9fd>int</span> dest, <span style=color:#8be9fd>int</span> weight) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>src</span> <span style=color:#ff79c6>=</span> src;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>dest</span> <span style=color:#ff79c6>=</span> dest;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>weight</span> <span style=color:#ff79c6>=</span> weight;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>main</span>(String<span style=color:#ff79c6>[]</span> args) {
+</span></span><span style=display:flex><span>        Scanner sc <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Scanner(System.<span style=color:#50fa7b>in</span>);
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> n <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> m <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>Edge<span style=color:#ff79c6>&gt;</span> grid <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> m; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> src <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> dest <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> weight <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            grid.<span style=color:#50fa7b>add</span>(<span style=color:#ff79c6>new</span> Edge(src, dest, weight));
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> start <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> end <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> k <span style=color:#ff79c6>=</span> sc.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> minDist <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        Arrays.<span style=color:#50fa7b>fill</span>(minDist, Integer.<span style=color:#50fa7b>MAX_VALUE</span>);
+</span></span><span style=display:flex><span>        minDist<span style=color:#ff79c6>[</span>start<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 1; i <span style=color:#ff79c6>&lt;=</span> k<span style=color:#ff79c6>+</span>1; i<span style=color:#ff79c6>++</span>) { <span style=color:#6272a4>// 对所有边 松弛 k+1 次</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (Edge edge : grid) { <span style=color:#6272a4>// 每一次松弛，都是对所有边进行松弛</span>
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> src <span style=color:#ff79c6>=</span> edge.<span style=color:#50fa7b>src</span>;
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> dest <span style=color:#ff79c6>=</span> edge.<span style=color:#50fa7b>dest</span>;
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> weight <span style=color:#ff79c6>=</span> edge.<span style=color:#50fa7b>weight</span>;
+</span></span><span style=display:flex><span>                <span style=color:#6272a4>// 松弛操作</span>
+</span></span><span style=display:flex><span>                <span style=color:#6272a4>// minDist[from] != INT_MAX 防止从未计算过的节点出发</span>
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (minDist<span style=color:#ff79c6>[</span>src<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>!=</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span> <span style=color:#ff79c6>&amp;&amp;</span> minDist<span style=color:#ff79c6>[</span>dest<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&gt;</span> minDist<span style=color:#ff79c6>[</span>src<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> weight) {
+</span></span><span style=display:flex><span>                    minDist<span style=color:#ff79c6>[</span>dest<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> minDist<span style=color:#ff79c6>[</span>src<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> weight;
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (minDist<span style=color:#ff79c6>[</span>end<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span>) {
+</span></span><span style=display:flex><span>            System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(<span style=color:#f1fa8c>&#34;unconnected&#34;</span>);
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>            System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(minDist<span style=color:#ff79c6>[</span>end<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=1019-floyd算法>10.1.9 Floyd算法</h2><p><strong>多源最短路问题</strong></p><p><strong>Floyd 算法对边的权值正负没有要求，都可以处理</strong>。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Floyd</span> {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>main</span>(String<span style=color:#ff79c6>[]</span> args) {
+</span></span><span style=display:flex><span>        Scanner scanner <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Scanner(System.<span style=color:#50fa7b>in</span>);
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> n <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> m <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> graph <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>][</span>n<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;=</span> n; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            Arrays.<span style=color:#50fa7b>fill</span>(graph<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>, 10005);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> m; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> from <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> to <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> weight <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            graph<span style=color:#ff79c6>[</span>from<span style=color:#ff79c6>][</span>to<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> weight;
+</span></span><span style=display:flex><span>            graph<span style=color:#ff79c6>[</span>to<span style=color:#ff79c6>][</span>from<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> weight;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 开始 floyd</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> k <span style=color:#ff79c6>=</span> 1; k <span style=color:#ff79c6>&lt;=</span> n; k<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 1; i <span style=color:#ff79c6>&lt;=</span> n; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> j <span style=color:#ff79c6>=</span> 1; j <span style=color:#ff79c6>&lt;=</span> n; j<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>                    graph<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>][</span>j<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> Math.<span style=color:#50fa7b>min</span>(graph<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>][</span>j<span style=color:#ff79c6>]</span>, graph<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>][</span>k<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> graph<span style=color:#ff79c6>[</span>k<span style=color:#ff79c6>][</span>j<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> num <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>while</span> (num<span style=color:#ff79c6>--</span> <span style=color:#ff79c6>&gt;</span> 0) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> start <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> end <span style=color:#ff79c6>=</span> scanner.<span style=color:#50fa7b>nextInt</span>();
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (graph<span style=color:#ff79c6>[</span>start<span style=color:#ff79c6>][</span>end<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> 10005) System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(<span style=color:#ff79c6>-</span>1);
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>else</span> System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(graph<span style=color:#ff79c6>[</span>start<span style=color:#ff79c6>][</span>end<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=10110-最短路问题总结>10.1.10 最短路问题总结</h2><p><img src=/img/2024-07-22-leetcode-note/assets/Snipaste_2024-07-31_15-03-15.png alt></p><h3 id=场景选择>场景选择：</h3><p><strong>如果遇到单源且边为正数，直接Dijkstra</strong>。</p><p>至于 <strong>使用朴素版还是 堆优化版 还是取决于图的稠密度</strong>， 多少节点多少边算是稠密图，多少算是稀疏图，这个没有量化，如果想量化只能写出两个版本然后做实验去测试，不同的判题机得出的结果还不太一样。</p><p>一般情况下，可以直接用堆优化版本。</p><p><strong>如果遇到单源边可为负数，直接 Bellman-Ford</strong>，同样 SPFA 还是 Bellman-Ford 取决于图的稠密度。</p><p>一般情况下，直接用 SPFA。</p><p><strong>如果有负权回路，优先 Bellman-Ford</strong>， 如果是有限节点最短路 也优先 Bellman-Ford，理由是写代码比较方便。</p><p><strong>如果是遇到多源点求最短路，直接 Floyd</strong>。</p><p>除非 源点特别少，且边都是正数，那可以 多次 Dijkstra 求出最短路径，但这种情况很少，一般出现多个源点了，就是想让你用 Floyd 了。</p><h2 id=102-重点题目及出错的题目等>10.2 重点题目及出错的题目等</h2><h3 id=200-岛屿数量httpsleetcodecnproblemsnumber-of-islands模板题><a href=https://leetcode.cn/problems/number-of-islands/>200. 岛屿数量</a>（模板题）</h3><h4 id=深搜法>深搜法</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> dir <span style=color:#ff79c6>=</span> {
 </span></span><span style=display:flex><span>        {0,1},{1,0},{<span style=color:#ff79c6>-</span>1,0},{0,<span style=color:#ff79c6>-</span>1}
 </span></span><span style=display:flex><span>};
 </span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>int</span> <span style=color:#50fa7b>numIslands</span>(<span style=color:#8be9fd>char</span><span style=color:#ff79c6>[][]</span> grid) {
