@@ -1,0 +1,136 @@
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta property="og:site_name" content="SleepingFace Blog"><meta property="og:type" content="article"><meta property="og:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta property="twitter:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta name=title content="策略模式+工厂模式实现多种文件类型上传处理"><meta property="og:title" content="策略模式+工厂模式实现多种文件类型上传处理"><meta property="twitter:title" content="策略模式+工厂模式实现多种文件类型上传处理"><meta name=description content="利用策略模式+工厂模式实现多种文件类型上传处理，代替if-else判断，提高代码可读性和扩展性。"><meta property="og:description" content="利用策略模式+工厂模式实现多种文件类型上传处理，代替if-else判断，提高代码可读性和扩展性。"><meta property="twitter:description" content="利用策略模式+工厂模式实现多种文件类型上传处理，代替if-else判断，提高代码可读性和扩展性。"><meta property="twitter:card" content="summary"><meta name=keyword content="WangZhendong"><link rel="shortcut icon" href=/img/favicon.ico><title>策略模式+工厂模式实现多种文件类型上传处理 | 王振东的博客 | WangZhendong Blog</title>
+<link rel=canonical href=/2024/07/31/2024-7-31-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/><link rel=stylesheet href=/css/bootstrap.min.css><link rel=stylesheet href=/css/hugo-theme-cleanwhite.min.css><link rel=stylesheet href=/css/zanshang.css><link rel=stylesheet href=/css/font-awesome.all.min.css><script src=/js/jquery.min.js></script><script src=/js/bootstrap.min.js></script><script src=/js/hux-blog.min.js></script><script src=/js/lazysizes.min.js></script></head><nav class="navbar navbar-default navbar-custom navbar-fixed-top"><div class=container-fluid><div class="navbar-header page-scroll"><button type=button class=navbar-toggle>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+</button>
+<a class=navbar-brand href=/>SleepingFace Blog</a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/>All Posts</a></li><li><a href=/categories/java/>java</a></li><li><a href=/categories/llm/>llm</a></li><li><a href=/archive//>ARCHIVE</a></li><li><a href=/notes//>NOTES</a></li><li><a href=/about//>ABOUT</a></li><li><a href=/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/img/home1.jpg)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/git title=Git>Git</a></div><h1>策略模式+工厂模式实现多种文件类型上传处理</h1><h2 class=subheading></h2><span class=meta>Posted by
+SleepingFace
+on
+Wednesday, July 31, 2024</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+post-container"><h1 id=策略模式工厂模式实现多种文件类型上传处理>策略模式+工厂模式实现多种文件类型上传处理</h1><h2 id=1-创建抽象策略类>1. 创建抽象策略类</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * 抽象策略类
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> */</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>interface</span> <span style=color:#50fa7b>FileReaderStrategy</span> {
+</span></span><span style=display:flex><span>    ArrayList<span style=color:#ff79c6>&lt;</span>String<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>readFile</span>(MultipartFile file) <span style=color:#8be9fd;font-style:italic>throws</span> IOException;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=2定义策略类>2.定义策略类</h2><p>我这里实现了doc、docx、markdown、txt的读取策略，把他们交给Spring容器管理。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Component
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>DocFileReaderStrategy</span> <span style=color:#8be9fd;font-style:italic>implements</span> FileReaderStrategy {
+</span></span><span style=display:flex><span>    @Override
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> ArrayList<span style=color:#ff79c6>&lt;</span>String<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>readFile</span>(MultipartFile file) <span style=color:#8be9fd;font-style:italic>throws</span> IOException {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> TxtUtils.<span style=color:#50fa7b>readerDocFile</span>(file);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Component
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>DocxFileReaderStrategy</span> <span style=color:#8be9fd;font-style:italic>implements</span> FileReaderStrategy {
+</span></span><span style=display:flex><span>    @Override
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> ArrayList<span style=color:#ff79c6>&lt;</span>String<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>readFile</span>(MultipartFile file) <span style=color:#8be9fd;font-style:italic>throws</span> IOException {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> TxtUtils.<span style=color:#50fa7b>readerDocxFile</span>(file);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Component
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>MdFileReaderStrategy</span> <span style=color:#8be9fd;font-style:italic>implements</span> FileReaderStrategy {
+</span></span><span style=display:flex><span>    @Override
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> ArrayList<span style=color:#ff79c6>&lt;</span>String<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>readFile</span>(MultipartFile file) <span style=color:#8be9fd;font-style:italic>throws</span> IOException {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> TxtUtils.<span style=color:#50fa7b>readerFile</span>(file);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Component
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>TxtFileReaderStrategy</span> <span style=color:#8be9fd;font-style:italic>implements</span> FileReaderStrategy {
+</span></span><span style=display:flex><span>    @Override
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> ArrayList<span style=color:#ff79c6>&lt;</span>String<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>readFile</span>(MultipartFile file) <span style=color:#8be9fd;font-style:italic>throws</span> IOException {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> TxtUtils.<span style=color:#50fa7b>readerFile</span>(file);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=3创建策略工厂>3.创建策略工厂</h2><h3 id=31-通过读取yml配置文件来获取有哪些策略>3.1 通过读取yml配置文件来获取有哪些策略</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Getter
+</span></span><span style=display:flex><span>@Setter
+</span></span><span style=display:flex><span>@Configuration
+</span></span><span style=display:flex><span>@ConfigurationProperties(prefix <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;readfile&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>ReadFileTypeConfig</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> Map<span style=color:#ff79c6>&lt;</span>String,String<span style=color:#ff79c6>&gt;</span> types;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=32-在yml里进行配置>3.2 在yml里进行配置</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-xml data-lang=xml><span style=display:flex><span>readfile:
+</span></span><span style=display:flex><span>  types:
+</span></span><span style=display:flex><span>    doc: docFileReaderStrategy
+</span></span><span style=display:flex><span>    docx: docxFileReaderStrategy
+</span></span><span style=display:flex><span>    md: mdFileReaderStrategy
+</span></span><span style=display:flex><span>    txt: txtFileReaderStrategy
+</span></span></code></pre></div><h3 id=3-策略工厂>3. 策略工厂</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * 操作策略的上下文环境类 工具类
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * 将策略整合起来 方便管理
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> */</span>
+</span></span><span style=display:flex><span>@Component
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>FileReaderFactory</span> <span style=color:#8be9fd;font-style:italic>implements</span> ApplicationContextAware {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @Resource
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> ReadFileTypeConfig readFileTypeConfig;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#8be9fd;font-style:italic>static</span> Map<span style=color:#ff79c6>&lt;</span>String, FileReaderStrategy<span style=color:#ff79c6>&gt;</span> strategyMap <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ConcurrentHashMap<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 从配置文件中读取策略信息存储到map中
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * {
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     *     doc: docFileReaderStrategy
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     *     docx: docxFileReaderStrategy
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     *     md: mdFileReaderStrategy
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     *     txt: txtFileReaderStrategy
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * }
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     *
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param applicationContext
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @throws BeansException
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    @Override
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>setApplicationContext</span>(ApplicationContext applicationContext) <span style=color:#8be9fd;font-style:italic>throws</span> BeansException {
+</span></span><span style=display:flex><span>        readFileTypeConfig.<span style=color:#50fa7b>getTypes</span>().<span style=color:#50fa7b>forEach</span>((k, y) <span style=color:#ff79c6>-&gt;</span> {
+</span></span><span style=display:flex><span>            strategyMap.<span style=color:#50fa7b>put</span>(k, (FileReaderStrategy) applicationContext.<span style=color:#50fa7b>getBean</span>(y));
+</span></span><span style=display:flex><span>        });
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 对外提供获取具体策略
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> FileReaderStrategy <span style=color:#50fa7b>getStrategy</span>(String type) {
+</span></span><span style=display:flex><span>        FileReaderStrategy fileReaderStrategy <span style=color:#ff79c6>=</span> strategyMap.<span style=color:#50fa7b>get</span>(type);
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> fileReaderStrategy;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><strong>其中<code>setApplicationContext</code>函数从Spring容器中获取策略的Bean对象到Map当中。</strong></p><p><strong><code>getStrategy</code>函数根据对应类型获取对应的策略。</strong></p><h2 id=4-改造service里的代码>4. 改造service里的代码</h2><p>我们注入<code>FileReaderFactory</code>，之后调用<code>fileReaderFactory.getStrategy(suffix)</code>获取策略。</p><p>判断策略是否存在，如果存在就可以调用具体策略的方法<code>strategy.readFile</code>；否则可以抛出异常。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Component
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>FileProcessor</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @Resource
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> FileReaderFactory fileReaderFactory;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> ArrayList<span style=color:#ff79c6>&lt;</span>String<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>processFile</span>(String suffix, MultipartFile multipartFile) <span style=color:#8be9fd;font-style:italic>throws</span> IOException {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        FileReaderStrategy strategy <span style=color:#ff79c6>=</span> fileReaderFactory.<span style=color:#50fa7b>getStrategy</span>(suffix);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (strategy <span style=color:#ff79c6>!=</span> <span style=color:#ff79c6>null</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span> strategy.<span style=color:#50fa7b>readFile</span>(multipartFile);
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> IllegalArgumentException(<span style=color:#f1fa8c>&#34;Unsupported file type: &#34;</span> <span style=color:#ff79c6>+</span> suffix);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class="entry-shang text-center"><p>「给个赞赏，支持一下作者吧~」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+<span class=author><a href=https://wangzhendong20.github.io/><img src=/img/favicon.png>SleepingFace Blog</a></span><p class=tip><i></i><span>给个赞赏，支持一下作者吧~</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
+<button class="btn btn-blink" data-num=5>5元</button>
+<button class="btn btn-blink" data-num=10>10元</button>
+<button class="btn btn-blink" data-num=50>50元</button>
+<button class="btn btn-blink" data-num=100>100元</button>
+<button class="btn btn-blink" data-num=1>任意金额</button></div><div class=zs-modal-pay><button class="btn btn-bred" id=pay-text>2元</button><p>使用<span id=pay-type>微信</span>扫描二维码完成支付</p><img src=/img/reward/wechat-2.png id=pay-image></div></div><div class=zs-modal-footer><label><input type=radio name=zs-type value=wechat class=zs-type checked><span><span class=zs-wechat><img src=/img/reward/wechat-btn.png></span></label>
+<label><input type=radio name=zs-type value=alipay class=zs-type class=zs-alipay><img src=/img/reward/alipay-btn.png></span></label></div></div><script type=text/javascript src=/js/reward.js></script><hr><ul class=pager><li class=previous><a href=/2024/07/29/2024-7-29-Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/ data-toggle=tooltip data-placement=top title=Git常用命令>&larr;
+Previous Post</a></li></ul><script src=https://giscus.app/client.js data-repo=wangzhendong20/wangzhendong20.github.io data-repo-id=***************************** data-category=**************************** data-category-id=************************** data-mapping=pathname data-reactions-enabled=1 data-emit-metadata=0 data-theme=light data-lang=en crossorigin=anonymous async></script></div><div class="col-lg-2 col-lg-offset-0
+visible-lg-block
+sidebar-container
+catalog-container"><div class=side-catalog><hr class="hidden-sm hidden-xs"><h5><a class=catalog-toggle href=#>CATALOG</a></h5><ul class=catalog-body></ul></div></div><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+sidebar-container"><section><hr class="hidden-sm hidden-xs"><h5><a href=/tags/>FEATURED TAGS</a></h5><div class=tags><a href=/tags/git title=git>git</a></div></section><section><hr><h5>FRIENDS</h5><ul class=list-inline><li><a target=_blank href=https://tanxiangyuu.github.io>谭总的博客</a></li></ul></section></div></div></div></article><footer><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><ul class="list-inline text-center"><li><a href=mailto:wangzhendong20@163.com><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-envelope fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://github.com/wangzhendong20><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-github fa-stack-1x fa-inverse"></i></span></a></li><li><a href rel=alternate type=application/rss+xml title="SleepingFace Blog"><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-rss fa-stack-1x fa-inverse"></i></span></a></li></ul><p class="copyright text-muted">&copy; SleepingFace Blog 2024<br><a>欢迎评论哦！</a></p></div></div></div></footer><script>function loadAsync(e,t){var s=document,o="script",n=s.createElement(o),i=s.getElementsByTagName(o)[0];n.src=e,t&&n.addEventListener("load",function(e){t(null,e)},!1),i.parentNode.insertBefore(n,i)}</script><script>$("#tag_cloud").length!==0&&loadAsync("/js/jquery.tagcloud.js",function(){$.fn.tagcloud.defaults={color:{start:"#bbbbee",end:"#0085a1"}},$("#tag_cloud a").tagcloud()})</script><script>loadAsync("https://cdn.jsdelivr.net/npm/fastclick@1.0.6/lib/fastclick.min.js",function(){var e=document.querySelector("nav");e&&FastClick.attach(e)})</script><script>(function(){var t,e=document.createElement("script"),n=window.location.protocol.split(":")[0];n==="https"?e.src="https://zz.bdstatic.com/linksubmit/push.js":e.src="http://push.zhanzhang.baidu.com/push.js",t=document.getElementsByTagName("script")[0],t.parentNode.insertBefore(e,t)})()</script><script>var _baId="8cc115b1ee28b68ce1138a4281875e00",_hmt=_hmt||[];(function(){var e,t=document.createElement("script");t.src="//hm.baidu.com/hm.js?"+_baId,e=document.getElementsByTagName("script")[0],e.parentNode.insertBefore(t,e)})()</script><script type=text/javascript>function generateCatalog(e){_containerSelector="div.post-container";var t,n,s,o,i,a=$(_containerSelector),r=a.find("h1,h2,h3,h4,h5,h6");return $(e).html(""),r.each(function(){t=$(this).prop("tagName").toLowerCase(),o="#"+$(this).prop("id"),n=$(this).text(),i=$('<a href="'+o+'" rel="nofollow">'+n+"</a>"),s=$('<li class="'+t+'_nav"></li>').append(i),$(e).append(s)}),!0}generateCatalog(".catalog-body"),$(".catalog-toggle").click(function(e){e.preventDefault(),$(".side-catalog").toggleClass("fold")}),loadAsync("/js/jquery.nav.js",function(){$(".catalog-body").onePageNav({currentClass:"active",changeHash:!1,easing:"swing",filter:"",scrollSpeed:700,scrollOffset:0,scrollThreshold:.2,begin:null,end:null,scrollChange:null,padding:80})})</script></body></html>
