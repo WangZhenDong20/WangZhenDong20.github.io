@@ -1,0 +1,160 @@
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta property="og:site_name" content="SleepingFace Blog"><meta property="og:type" content="article"><meta property="og:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta property="twitter:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta name=title content="SDK开发 - 快速入门"><meta property="og:title" content="SDK开发 - 快速入门"><meta property="twitter:title" content="SDK开发 - 快速入门"><meta name=description content="今天尝试将SleepingFace BI项目中的功能开发为SDK，这样调用者只需要引入依赖，配置ak/sk，然后调用API就可以使用了。"><meta property="og:description" content="今天尝试将SleepingFace BI项目中的功能开发为SDK，这样调用者只需要引入依赖，配置ak/sk，然后调用API就可以使用了。"><meta property="twitter:description" content="今天尝试将SleepingFace BI项目中的功能开发为SDK，这样调用者只需要引入依赖，配置ak/sk，然后调用API就可以使用了。"><meta property="twitter:card" content="summary"><meta name=keyword content="WangZhendong"><link rel="shortcut icon" href=/img/favicon.ico><title>SDK开发 - 快速入门 | 王振东的博客 | SleepingFace Blog</title>
+<link rel=canonical href=/2024/08/03/2024-8-3-SDK%E5%BC%80%E5%8F%91/><link rel=stylesheet href=/css/bootstrap.min.css><link rel=stylesheet href=/css/hugo-theme-cleanwhite.min.css><link rel=stylesheet href=/css/zanshang.css><link rel=stylesheet href=/css/font-awesome.all.min.css><script src=/js/jquery.min.js></script><script src=/js/bootstrap.min.js></script><script src=/js/hux-blog.min.js></script><script src=/js/lazysizes.min.js></script></head><nav class="navbar navbar-default navbar-custom navbar-fixed-top"><div class=container-fluid><div class="navbar-header page-scroll"><button type=button class=navbar-toggle>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+</button>
+<a class=navbar-brand href=/>SleepingFace Blog</a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/>All Posts</a></li><li><a href=/categories/java/>java</a></li><li><a href=/categories/llm/>llm</a></li><li><a href=/archive//>ARCHIVE</a></li><li><a href=/notes//>NOTES</a></li><li><a href=/about//>ABOUT</a></li><li><a href=/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/img/home1.jpg)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/java title=Java>Java</a></div><h1>SDK开发 - 快速入门</h1><h2 class=subheading></h2><span class=meta>Posted by
+SleepingFace
+on
+Saturday, August 3, 2024</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+post-container"><h1 id=sdk开发>SDK开发</h1><p><strong>前言</strong>：今天尝试将<em>SleepingFace BI</em>项目中的功能开发为SDK，这样调用者只需要引入依赖，配置ak/sk，然后调用API就可以使用了。</p><h2 id=1-api签名认证>1. API签名认证</h2><h3 id=11-数据库设计>1.1 数据库设计</h3><p>首先，我们将ak/sk和userId绑定。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#ff79c6>create</span> <span style=color:#ff79c6>table</span> <span style=color:#ff79c6>if</span> <span style=color:#ff79c6>not</span> <span style=color:#ff79c6>exists</span> key_record
+</span></span><span style=display:flex><span>(
+</span></span><span style=display:flex><span>    id          <span style=color:#8be9fd;font-style:italic>bigint</span> auto_increment <span style=color:#ff79c6>comment</span> <span style=color:#f1fa8c>&#39;id&#39;</span> <span style=color:#ff79c6>primary</span> <span style=color:#ff79c6>key</span>,
+</span></span><span style=display:flex><span>    userId      <span style=color:#8be9fd;font-style:italic>bigint</span>                             <span style=color:#ff79c6>null</span> <span style=color:#ff79c6>comment</span> <span style=color:#f1fa8c>&#39;创建用户Id&#39;</span>,
+</span></span><span style=display:flex><span>    accessKey   <span style=color:#8be9fd;font-style:italic>varchar</span>(<span style=color:#bd93f9>512</span>)                       <span style=color:#ff79c6>not</span> <span style=color:#ff79c6>null</span> <span style=color:#ff79c6>comment</span> <span style=color:#f1fa8c>&#39;accessKey&#39;</span>,
+</span></span><span style=display:flex><span>    secretKey   <span style=color:#8be9fd;font-style:italic>varchar</span>(<span style=color:#bd93f9>512</span>)                       <span style=color:#ff79c6>not</span> <span style=color:#ff79c6>null</span> <span style=color:#ff79c6>comment</span> <span style=color:#f1fa8c>&#39;secretKey&#39;</span>,
+</span></span><span style=display:flex><span>    createTime  datetime <span style=color:#ff79c6>default</span> <span style=color:#ff79c6>CURRENT_TIMESTAMP</span> <span style=color:#ff79c6>not</span> <span style=color:#ff79c6>null</span> <span style=color:#ff79c6>comment</span> <span style=color:#f1fa8c>&#39;创建时间&#39;</span>,
+</span></span><span style=display:flex><span>    updateTime  datetime <span style=color:#ff79c6>default</span> <span style=color:#ff79c6>CURRENT_TIMESTAMP</span> <span style=color:#ff79c6>not</span> <span style=color:#ff79c6>null</span> <span style=color:#ff79c6>on</span> <span style=color:#ff79c6>update</span> <span style=color:#ff79c6>CURRENT_TIMESTAMP</span> <span style=color:#ff79c6>comment</span> <span style=color:#f1fa8c>&#39;更新时间&#39;</span>,
+</span></span><span style=display:flex><span>    isDelete    tinyint  <span style=color:#ff79c6>default</span> <span style=color:#bd93f9>0</span>                 <span style=color:#ff79c6>not</span> <span style=color:#ff79c6>null</span> <span style=color:#ff79c6>comment</span> <span style=color:#f1fa8c>&#39;是否删除&#39;</span>
+</span></span><span style=display:flex><span>    ) <span style=color:#ff79c6>comment</span> <span style=color:#f1fa8c>&#39;API签名认证表&#39;</span> <span style=color:#ff79c6>collate</span> <span style=color:#ff79c6>=</span> utf8mb4_unicode_ci;
+</span></span></code></pre></div><h3 id=12-为用户生成aksk>1.2 为用户生成ak/sk</h3><p>生成ak/sk的算法选择什么都可以</p><p>用户在点击申请后，就出生成ak/sk</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@GetMapping(<span style=color:#f1fa8c>&#34;/generateKeys&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> BaseResponse<span style=color:#ff79c6>&lt;</span>KeyRecordVO<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>generateKeys</span>() {
+</span></span><span style=display:flex><span>    User loginUser <span style=color:#ff79c6>=</span> userService.<span style=color:#50fa7b>getLoginUser</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    String ak <span style=color:#ff79c6>=</span> KeyGenerator.<span style=color:#50fa7b>generateAccessKey</span>();
+</span></span><span style=display:flex><span>    String sk <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>null</span>;
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>try</span> {
+</span></span><span style=display:flex><span>        sk <span style=color:#ff79c6>=</span> KeyGenerator.<span style=color:#50fa7b>generateSecretKey</span>();
+</span></span><span style=display:flex><span>    } <span style=color:#ff79c6>catch</span> (NoSuchAlgorithmException e) {
+</span></span><span style=display:flex><span>        ThrowUtils.<span style=color:#50fa7b>throwIf</span>(<span style=color:#ff79c6>true</span>, ErrorCode.<span style=color:#50fa7b>SYSTEM_ERROR</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    ThrowUtils.<span style=color:#50fa7b>throwIf</span>(StringUtils.<span style=color:#50fa7b>isBlank</span>(ak) <span style=color:#ff79c6>||</span> StringUtils.<span style=color:#50fa7b>isBlank</span>(sk), ErrorCode.<span style=color:#50fa7b>SYSTEM_ERROR</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>// 存储AK和SK</span>
+</span></span><span style=display:flex><span>    KeyRecord keyRecord <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> KeyRecord();
+</span></span><span style=display:flex><span>    keyRecord.<span style=color:#50fa7b>setUserId</span>(loginUser.<span style=color:#50fa7b>getId</span>());
+</span></span><span style=display:flex><span>    keyRecord.<span style=color:#50fa7b>setAccessKey</span>(ak);
+</span></span><span style=display:flex><span>    keyRecord.<span style=color:#50fa7b>setSecretKey</span>(sk);
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>boolean</span> save <span style=color:#ff79c6>=</span> keyRecordService.<span style=color:#50fa7b>save</span>(keyRecord);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    ThrowUtils.<span style=color:#50fa7b>throwIf</span>(<span style=color:#ff79c6>!</span>save, ErrorCode.<span style=color:#50fa7b>OPERATION_ERROR</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    KeyRecordVO keyRecordVO <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> KeyRecordVO();
+</span></span><span style=display:flex><span>    BeanUtils.<span style=color:#50fa7b>copyProperties</span>(keyRecord, keyRecordVO);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>// 返回AK和SK</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> ResultUtils.<span style=color:#50fa7b>success</span>(keyRecordVO);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=2-开发sdk>2. 开发SDK</h2><h3 id=新建项目>新建项目</h3><p>我们新建一个项目<code>api-client-sdk</code></p><p>在pom文件里删除<code>&lt;build>...&lt;/build></code>内容</p><p>这个是maven构建项目的方式，我们要构建依赖包，而不是直接运行Jar包的项目。</p><h3 id=sdk功能开发>SDK功能开发</h3><h4 id=aksk加密传输>ak/sk加密传输</h4><p>我这项目里实现了文本生成功能的API开发，我就以这个为例子。</p><p>由于sk不能直接传输，所以我们需要将sk采用算法加密之后传输。</p><p>可以<strong>body+sk+随机数+时间戳</strong>进行组合加密，加密算法采用SHA256。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>SignUtils</span> {
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 生成签名
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param body
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param secretKey
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>static</span> String <span style=color:#50fa7b>genSign</span>(String body, String secretKey) {
+</span></span><span style=display:flex><span>        Digester md5 <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Digester(DigestAlgorithm.<span style=color:#50fa7b>SHA256</span>);
+</span></span><span style=display:flex><span>        String content <span style=color:#ff79c6>=</span> body <span style=color:#ff79c6>+</span> <span style=color:#f1fa8c>&#34;.&#34;</span> <span style=color:#ff79c6>+</span> secretKey;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> md5.<span style=color:#50fa7b>digestHex</span>(content);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=apiclient功能编写>ApiClient功能编写</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>ApiClient</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd;font-style:italic>final</span> String GATEWAY_HOST <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;http://localhost:8099&#34;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> String accessKey;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> String secretKey;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#50fa7b>ApiClient</span>(String accessKey, String secretKey) {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>accessKey</span> <span style=color:#ff79c6>=</span> accessKey;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>secretKey</span> <span style=color:#ff79c6>=</span> secretKey;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @Resource
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> FileProcessor fileProcessor;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> Map<span style=color:#ff79c6>&lt;</span>String, String<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>getHeaderMap</span>(String body, String name, String textType) {
+</span></span><span style=display:flex><span>        Map<span style=color:#ff79c6>&lt;</span>String, String<span style=color:#ff79c6>&gt;</span> hashMap <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> HashMap<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        hashMap.<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;accessKey&#34;</span>, accessKey);
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 一定不能直接发送</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>//        hashMap.put(&#34;secretKey&#34;, secretKey);</span>
+</span></span><span style=display:flex><span>        hashMap.<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;nonce&#34;</span>, RandomUtil.<span style=color:#50fa7b>randomNumbers</span>(4));
+</span></span><span style=display:flex><span>        hashMap.<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;body&#34;</span>, body);
+</span></span><span style=display:flex><span>        hashMap.<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;name&#34;</span>, name);
+</span></span><span style=display:flex><span>        hashMap.<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;textType&#34;</span>, textType);
+</span></span><span style=display:flex><span>        hashMap.<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;timestamp&#34;</span>, String.<span style=color:#50fa7b>valueOf</span>(System.<span style=color:#50fa7b>currentTimeMillis</span>() <span style=color:#ff79c6>/</span> 1000));
+</span></span><span style=display:flex><span>        hashMap.<span style=color:#50fa7b>put</span>(<span style=color:#f1fa8c>&#34;sign&#34;</span>, genSign(body, secretKey));
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> hashMap;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> String <span style=color:#50fa7b>genText</span>(MultipartFile multipartFile, String name, String textType) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//校验文件</span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>long</span> size <span style=color:#ff79c6>=</span> multipartFile.<span style=color:#50fa7b>getSize</span>();
+</span></span><span style=display:flex><span>        String originalFilename <span style=color:#ff79c6>=</span> multipartFile.<span style=color:#50fa7b>getOriginalFilename</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>final</span> <span style=color:#8be9fd>long</span> ONE_MB <span style=color:#ff79c6>=</span> 1024<span style=color:#ff79c6>*</span>1024;
+</span></span><span style=display:flex><span>        ThrowUtils.<span style=color:#50fa7b>throwIf</span>(size<span style=color:#ff79c6>&gt;</span>ONE_MB,ErrorCode.<span style=color:#50fa7b>PARAMS_ERROR</span>,<span style=color:#f1fa8c>&#34;文件超过1MB&#34;</span>);
+</span></span><span style=display:flex><span>        ThrowUtils.<span style=color:#50fa7b>throwIf</span>(size<span style=color:#ff79c6>==</span>0, ErrorCode.<span style=color:#50fa7b>PARAMS_ERROR</span>,<span style=color:#f1fa8c>&#34;文件为空&#34;</span>);
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//校验文件后缀</span>
+</span></span><span style=display:flex><span>        String suffix <span style=color:#ff79c6>=</span> FileUtil.<span style=color:#50fa7b>getSuffix</span>(originalFilename);
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>final</span> List<span style=color:#ff79c6>&lt;</span>String<span style=color:#ff79c6>&gt;</span> validFileSuffix <span style=color:#ff79c6>=</span> Arrays.<span style=color:#50fa7b>asList</span>(<span style=color:#f1fa8c>&#34;txt&#34;</span>,<span style=color:#f1fa8c>&#34;doc&#34;</span>,<span style=color:#f1fa8c>&#34;docx&#34;</span>,<span style=color:#f1fa8c>&#34;md&#34;</span>);
+</span></span><span style=display:flex><span>        ThrowUtils.<span style=color:#50fa7b>throwIf</span>(<span style=color:#ff79c6>!</span>validFileSuffix.<span style=color:#50fa7b>contains</span>(suffix),ErrorCode.<span style=color:#50fa7b>PARAMS_ERROR</span>,<span style=color:#f1fa8c>&#34;文件后缀名非法&#34;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        ArrayList<span style=color:#ff79c6>&lt;</span>String<span style=color:#ff79c6>&gt;</span> files <span style=color:#ff79c6>=</span> fileProcessor.<span style=color:#50fa7b>processFile</span>(suffix, multipartFile);
+</span></span><span style=display:flex><span>        String json <span style=color:#ff79c6>=</span> JSONUtil.<span style=color:#50fa7b>toJsonStr</span>(files);
+</span></span><span style=display:flex><span>        HttpResponse httpResponse <span style=color:#ff79c6>=</span> HttpRequest.<span style=color:#50fa7b>post</span>(GATEWAY_HOST <span style=color:#ff79c6>+</span> <span style=color:#f1fa8c>&#34;/text/api/gen&#34;</span>)
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>addHeaders</span>(getHeaderMap(json,name,textType))
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>body</span>(json)
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>execute</span>();
+</span></span><span style=display:flex><span>        System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(httpResponse.<span style=color:#50fa7b>getStatus</span>());
+</span></span><span style=display:flex><span>        String result <span style=color:#ff79c6>=</span> httpResponse.<span style=color:#50fa7b>body</span>();
+</span></span><span style=display:flex><span>        System.<span style=color:#50fa7b>out</span>.<span style=color:#50fa7b>println</span>(result);
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> result;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><strong>网关地址：</strong> 设置 <code>GATEWAY_HOST</code> 为 <code>http://localhost:8099</code> 来指定要请求的API网关地址。</p><p><code>accessKey</code> 和 <code>secretKey</code> API签名认证。</p><p><code>getHeaderMap</code>方法用于生成一个包含请求头信息的 <code>Map</code>，包括以下内容：</p><ul><li><code>accessKey</code>：访问密钥。</li><li><code>nonce</code>：用于确保请求的唯一性（随机数）。</li><li><code>body</code>：请求的主体内容（文件处理后的JSON字符串）。</li><li><code>name</code>：文件名。</li><li><code>textType</code>：文本类型。</li><li><code>timestamp</code>：请求的时间戳，单位为秒。</li><li><code>sign</code>：使用 <code>secretKey</code> 生成的签名，用于确保请求的完整性和安全性。</li></ul><p><strong><code>genText</code> 方法</strong>是我们实现的接口功能。</p><p>我们将参数封装好之后发送HTTP请求并获得Response。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>HttpResponse httpResponse <span style=color:#ff79c6>=</span> HttpRequest.<span style=color:#50fa7b>post</span>(GATEWAY_HOST <span style=color:#ff79c6>+</span> <span style=color:#f1fa8c>&#34;/text/api/gen&#34;</span>)
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>addHeaders</span>(getHeaderMap(json,name,textType))
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>body</span>(json)
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>execute</span>();
+</span></span></code></pre></div><h3 id=创建配置类>创建配置类</h3><p>我们编写一个配置类，让用户能够通过引入starter的方式直接使用而不需要手动创建对象实例。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Configuration
+</span></span><span style=display:flex><span>@ConfigurationProperties(<span style=color:#f1fa8c>&#34;api.client&#34;</span>)
+</span></span><span style=display:flex><span>@Data
+</span></span><span style=display:flex><span>@ComponentScan
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>ApiClientConfig</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> String accessKey;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> String secretKey;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @Bean
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> ApiClient <span style=color:#50fa7b>apiClient</span>() {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>new</span> ApiClient(accessKey, secretKey);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=在meta-inf目录下创建springfactories>在META-INF目录下创建<code>spring.factories</code></h3><p>在这里我们指定了要自动配置的类，通过<code>spring.factories</code>文件中配置我们的配置类，Spring Boot会在应用启动时自动加载和实例化<code>ApiClientConfig</code>。这样就可以使用自动配置生成的<code>ApiClient</code>对象，而无需手动创建和配置。</p><pre tabindex=0><code>org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.dong.apiclientsdk.ApiClientConfig
+</code></pre><h3 id=mvn-install>mvn install</h3><p>我们执行mvn install将它安装为本地的依赖。</p><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/Snipaste_2024-08-03_22-49-04.png alt></p><p><em>要删除Test里的启动类，否则会执行测试。</em></p><p><strong>看到输出BUILD SUCCESS就是成功了。</strong></p><p>打包后的依赖包就会出现在这个位置：</p><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/Snipaste_2024-08-03_22-51-50.png alt></p><h2 id=3-使用sdk>3. 使用SDK</h2><h3 id=引入依赖>引入依赖：</h3><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/API1.png alt></p><h3 id=配置aksk>配置ak/sk</h3><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/API2.png alt></p><h3 id=注入>注入</h3><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/API3.png alt></p><p><strong>就可以使用啦！</strong></p><p><em>文章写的略微粗糙，如有错误请一定更正我哦！</em></p><div class="entry-shang text-center"><p>「给个赞赏，支持一下作者吧~」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+<span class=author><a href=https://wangzhendong20.github.io/><img src=/img/favicon.png>SleepingFace Blog</a></span><p class=tip><i></i><span>给个赞赏，支持一下作者吧~</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
+<button class="btn btn-blink" data-num=5>5元</button>
+<button class="btn btn-blink" data-num=10>10元</button>
+<button class="btn btn-blink" data-num=50>50元</button>
+<button class="btn btn-blink" data-num=100>100元</button>
+<button class="btn btn-blink" data-num=1>任意金额</button></div><div class=zs-modal-pay><button class="btn btn-bred" id=pay-text>2元</button><p>使用<span id=pay-type>微信</span>扫描二维码完成支付</p><img src=/img/reward/wechat-2.png id=pay-image></div></div><div class=zs-modal-footer><label><input type=radio name=zs-type value=wechat class=zs-type checked><span><span class=zs-wechat><img src=/img/reward/wechat-btn.png></span></label>
+<label><input type=radio name=zs-type value=alipay class=zs-type class=zs-alipay><img src=/img/reward/alipay-btn.png></span></label></div></div><script type=text/javascript src=/js/reward.js></script><hr><ul class=pager><li class=previous><a href=/2024/08/02/2024-08-02-leetcodeDaily1/ data-toggle=tooltip data-placement=top title="每日一题 - 2024/8/2">&larr;
+Previous Post</a></li></ul><script src=https://giscus.app/client.js data-repo=wangzhendong20/wangzhendong20.github.io data-repo-id=***************************** data-category=**************************** data-category-id=************************** data-mapping=pathname data-reactions-enabled=1 data-emit-metadata=0 data-theme=light data-lang=en crossorigin=anonymous async></script></div><div class="col-lg-2 col-lg-offset-0
+visible-lg-block
+sidebar-container
+catalog-container"><div class=side-catalog><hr class="hidden-sm hidden-xs"><h5><a class=catalog-toggle href=#>CATALOG</a></h5><ul class=catalog-body></ul></div></div><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+sidebar-container"><section><hr class="hidden-sm hidden-xs"><h5><a href=/tags/>FEATURED TAGS</a></h5><div class=tags><a href=/tags/java title=java>java
+</a><a href=/tags/leetcode title=leetcode>leetcode
+</a><a href=/tags/%E7%AE%97%E6%B3%95 title=算法>算法</a></div></section><section><hr><h5>FRIENDS</h5><ul class=list-inline><li><a target=_blank href=https://tanxiangyuu.github.io>谭总的博客</a></li></ul></section></div></div></div></article><footer><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><ul class="list-inline text-center"><li><a href=mailto:wangzhendong20@163.com><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-envelope fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://github.com/wangzhendong20><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-github fa-stack-1x fa-inverse"></i></span></a></li><li><a href rel=alternate type=application/rss+xml title="SleepingFace Blog"><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-rss fa-stack-1x fa-inverse"></i></span></a></li></ul><p class="copyright text-muted">&copy; SleepingFace Blog 2024<br><a>欢迎评论哦！</a></p></div></div></div></footer><script>function loadAsync(e,t){var s=document,o="script",n=s.createElement(o),i=s.getElementsByTagName(o)[0];n.src=e,t&&n.addEventListener("load",function(e){t(null,e)},!1),i.parentNode.insertBefore(n,i)}</script><script>$("#tag_cloud").length!==0&&loadAsync("/js/jquery.tagcloud.js",function(){$.fn.tagcloud.defaults={color:{start:"#bbbbee",end:"#0085a1"}},$("#tag_cloud a").tagcloud()})</script><script>loadAsync("https://cdn.jsdelivr.net/npm/fastclick@1.0.6/lib/fastclick.min.js",function(){var e=document.querySelector("nav");e&&FastClick.attach(e)})</script><script>(function(){var t,e=document.createElement("script"),n=window.location.protocol.split(":")[0];n==="https"?e.src="https://zz.bdstatic.com/linksubmit/push.js":e.src="http://push.zhanzhang.baidu.com/push.js",t=document.getElementsByTagName("script")[0],t.parentNode.insertBefore(e,t)})()</script><script>var _baId="8cc115b1ee28b68ce1138a4281875e00",_hmt=_hmt||[];(function(){var e,t=document.createElement("script");t.src="//hm.baidu.com/hm.js?"+_baId,e=document.getElementsByTagName("script")[0],e.parentNode.insertBefore(t,e)})()</script><script type=text/javascript>function generateCatalog(e){_containerSelector="div.post-container";var t,n,s,o,i,a=$(_containerSelector),r=a.find("h1,h2,h3,h4,h5,h6");return $(e).html(""),r.each(function(){t=$(this).prop("tagName").toLowerCase(),o="#"+$(this).prop("id"),n=$(this).text(),i=$('<a href="'+o+'" rel="nofollow">'+n+"</a>"),s=$('<li class="'+t+'_nav"></li>').append(i),$(e).append(s)}),!0}generateCatalog(".catalog-body"),$(".catalog-toggle").click(function(e){e.preventDefault(),$(".side-catalog").toggleClass("fold")}),loadAsync("/js/jquery.nav.js",function(){$(".catalog-body").onePageNav({currentClass:"active",changeHash:!1,easing:"swing",filter:"",scrollSpeed:700,scrollOffset:0,scrollThreshold:.2,begin:null,end:null,scrollChange:null,padding:80})})</script></body></html>
