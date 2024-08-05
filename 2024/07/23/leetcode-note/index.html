@@ -5452,6 +5452,26 @@ for (int i = 0; i &lt; numCourses; i++) {
 </span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span> map.<span style=color:#50fa7b>getOrDefault</span>(node,0);
 </span></span><span style=display:flex><span>        }
 </span></span><span style=display:flex><span>    }
+</span></span></code></pre></div><h2 id=3无重复字符的最长子串httpsleetcodecnproblemslongest-substring-without-repeating-characters><a href=https://leetcode.cn/problems/longest-substring-without-repeating-characters/>3.无重复字符的最长子串</a></h2><p>将字符串放入HashMap中，当遇到重复字符时，将左边界向右移动，直到重复字符不再出现，记录当前子串的长度，并更新最大长度</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>int</span> <span style=color:#50fa7b>lengthOfLongestSubstring</span>(String s) {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (s.<span style=color:#50fa7b>length</span>() <span style=color:#ff79c6>==</span> 0) <span style=color:#ff79c6>return</span> 0;
+</span></span><span style=display:flex><span>        HashMap<span style=color:#ff79c6>&lt;</span>Character,Integer<span style=color:#ff79c6>&gt;</span> map <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> HashMap<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> left <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> maxLen <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> right <span style=color:#ff79c6>=</span> 0; right <span style=color:#ff79c6>&lt;</span> s.<span style=color:#50fa7b>length</span>(); right<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>char</span> c <span style=color:#ff79c6>=</span> s.<span style=color:#50fa7b>charAt</span>(right);
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>while</span> (map.<span style=color:#50fa7b>containsKey</span>(c)) {
+</span></span><span style=display:flex><span>                map.<span style=color:#50fa7b>remove</span>(s.<span style=color:#50fa7b>charAt</span>(left));
+</span></span><span style=display:flex><span>                left<span style=color:#ff79c6>++</span>;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>            map.<span style=color:#50fa7b>put</span>(c, map.<span style=color:#50fa7b>getOrDefault</span>(c,0) <span style=color:#ff79c6>+</span> 1);
+</span></span><span style=display:flex><span>            maxLen <span style=color:#ff79c6>=</span> Math.<span style=color:#50fa7b>max</span>(maxLen, right <span style=color:#ff79c6>-</span> left <span style=color:#ff79c6>+</span> 1);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> maxLen;
+</span></span><span style=display:flex><span>    }
 </span></span></code></pre></div><div class="entry-shang text-center"><p>「给个赞赏，支持一下作者吧~」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://wangzhendong20.github.io/><img src=/img/favicon.png>SleepingFace Blog</a></span><p class=tip><i></i><span>给个赞赏，支持一下作者吧~</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
