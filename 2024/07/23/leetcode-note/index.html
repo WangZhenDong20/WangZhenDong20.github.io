@@ -5472,6 +5472,45 @@ for (int i = 0; i &lt; numCourses; i++) {
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> maxLen;
 </span></span><span style=display:flex><span>    }
+</span></span></code></pre></div><h2 id=4-寻找两个正序数组的中位数httpsleetcodecnproblemsmedian-of-two-sorted-arrays><a href=https://leetcode.cn/problems/median-of-two-sorted-arrays/>4. 寻找两个正序数组的中位数</a></h2><p>求两个有序数组的中位数 -> 求第k小的数</p><p>核心思想是每次排除k/2个数</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 求两个有序数组的中位数 -&gt; 求第k小的数
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 核心思想是每次排除k/2个数
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param nums1
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param nums2
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>double</span> <span style=color:#50fa7b>findMedianSortedArrays</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> nums1, <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> nums2) {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> n <span style=color:#ff79c6>=</span> nums1.<span style=color:#50fa7b>length</span>;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> m <span style=color:#ff79c6>=</span> nums2.<span style=color:#50fa7b>length</span>;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> left <span style=color:#ff79c6>=</span> (n <span style=color:#ff79c6>+</span> m <span style=color:#ff79c6>+</span> 1) <span style=color:#ff79c6>/</span> 2;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> right <span style=color:#ff79c6>=</span> (n <span style=color:#ff79c6>+</span> m <span style=color:#ff79c6>+</span> 2) <span style=color:#ff79c6>/</span> 2;
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 奇数时，取中间值；偶数时，取中间两个数的平均值;</span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 将奇数和偶数的情况合并处理，奇数时的k是相同的;</span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 例如 n = 1, m = 2, 那么left = 2, right = 2; 而 n=2,m=2,那么 left = 2, right = 3;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> (getKth(nums1,0,n<span style=color:#ff79c6>-</span>1,nums2,0,m<span style=color:#ff79c6>-</span>1,left) <span style=color:#ff79c6>+</span> getKth(nums1,0,n<span style=color:#ff79c6>-</span>1,nums2,0,m<span style=color:#ff79c6>-</span>1,right)) <span style=color:#ff79c6>*</span> 0.<span style=color:#50fa7b>5</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#8be9fd>int</span> <span style=color:#50fa7b>getKth</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> nums1, <span style=color:#8be9fd>int</span> start1, <span style=color:#8be9fd>int</span> end1, <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> nums2, <span style=color:#8be9fd>int</span> start2, <span style=color:#8be9fd>int</span> end2, <span style=color:#8be9fd>int</span> k) {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> len1 <span style=color:#ff79c6>=</span> end1 <span style=color:#ff79c6>-</span> start1 <span style=color:#ff79c6>+</span> 1;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> len2 <span style=color:#ff79c6>=</span> end2 <span style=color:#ff79c6>-</span> start2 <span style=color:#ff79c6>+</span> 1;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (len1 <span style=color:#ff79c6>&gt;</span> len2) { <span style=color:#6272a4>//让 len1 的长度小于 len2，这样就能保证如果有数组空了，一定是 len1</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span> getKth(nums2, start2, end2, nums1, start1, end1, k);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (len1 <span style=color:#ff79c6>==</span> 0) <span style=color:#ff79c6>return</span> nums2<span style=color:#ff79c6>[</span>start2 <span style=color:#ff79c6>+</span> k <span style=color:#ff79c6>-</span> 1<span style=color:#ff79c6>]</span>;  <span style=color:#6272a4>// len1空了，那直接从nums2里选</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (k <span style=color:#ff79c6>==</span> 1) <span style=color:#ff79c6>return</span> Math.<span style=color:#50fa7b>min</span>(nums1<span style=color:#ff79c6>[</span>start1<span style=color:#ff79c6>]</span>, nums2<span style=color:#ff79c6>[</span>start2<span style=color:#ff79c6>]</span>);  <span style=color:#6272a4>//k=1的时候取小的那个数</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 每次排除 k/2 个数，然后递归查找</span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> start1 <span style=color:#ff79c6>+</span> Math.<span style=color:#50fa7b>min</span>(len1, k<span style=color:#ff79c6>/</span>2) <span style=color:#ff79c6>-</span> 1;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> j <span style=color:#ff79c6>=</span> start2 <span style=color:#ff79c6>+</span> Math.<span style=color:#50fa7b>min</span>(len2, k<span style=color:#ff79c6>/</span>2) <span style=color:#ff79c6>-</span> 1;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (nums1<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&gt;</span> nums2<span style=color:#ff79c6>[</span>j<span style=color:#ff79c6>]</span>) { <span style=color:#6272a4>// 选大的那个，把小的那个数组里的前面的数排除掉</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span> getKth(nums1, start1, end1, nums2, j<span style=color:#ff79c6>+</span>1, end2 , k <span style=color:#ff79c6>-</span> (j <span style=color:#ff79c6>-</span> start2 <span style=color:#ff79c6>+</span> 1));
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span> getKth(nums1, i<span style=color:#ff79c6>+</span>1, end1, nums2, start2, end2, k <span style=color:#ff79c6>-</span> (i <span style=color:#ff79c6>-</span> start1 <span style=color:#ff79c6>+</span> 1));
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
 </span></span></code></pre></div><div class="entry-shang text-center"><p>「给个赞赏，支持一下作者吧~」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://wangzhendong20.github.io/><img src=/img/favicon.png>SleepingFace Blog</a></span><p class=tip><i></i><span>给个赞赏，支持一下作者吧~</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
