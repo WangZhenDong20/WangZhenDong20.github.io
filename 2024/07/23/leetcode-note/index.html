@@ -5609,6 +5609,21 @@ for (int i = 0; i &lt; numCourses; i++) {
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> res;
 </span></span><span style=display:flex><span>    }
+</span></span></code></pre></div><h2 id=279-完全平方数httpsleetcodecnproblemsperfect-squares><a href=https://leetcode.cn/problems/perfect-squares/>279. 完全平方数</a></h2><p><em>完全背包问题</em></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>int</span> <span style=color:#50fa7b>numSquares</span>(<span style=color:#8be9fd>int</span> n) {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> dp <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n <span style=color:#ff79c6>+</span> 1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        Arrays.<span style=color:#50fa7b>fill</span>(dp, Integer.<span style=color:#50fa7b>MAX_VALUE</span>);
+</span></span><span style=display:flex><span>        dp<span style=color:#ff79c6>[</span>0<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>        dp<span style=color:#ff79c6>[</span>1<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> 1;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 1; i <span style=color:#ff79c6>&lt;=</span> n<span style=color:#ff79c6>/</span>2; i<span style=color:#ff79c6>++</span>) {  <span style=color:#6272a4>// 物品</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> j <span style=color:#ff79c6>=</span> i<span style=color:#ff79c6>*</span>i; j <span style=color:#ff79c6>&lt;=</span> n; j<span style=color:#ff79c6>++</span>) {  <span style=color:#6272a4>//背包</span>
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (dp<span style=color:#ff79c6>[</span>j <span style=color:#ff79c6>-</span> i<span style=color:#ff79c6>*</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>!=</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span>) {
+</span></span><span style=display:flex><span>                    dp<span style=color:#ff79c6>[</span>j<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> Math.<span style=color:#50fa7b>min</span>(dp<span style=color:#ff79c6>[</span>j<span style=color:#ff79c6>]</span>, dp<span style=color:#ff79c6>[</span>j<span style=color:#ff79c6>-</span>i<span style=color:#ff79c6>*</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> 1);
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> dp<span style=color:#ff79c6>[</span>n<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>    }
 </span></span></code></pre></div><div class="entry-shang text-center"><p>「给个赞赏，支持一下作者吧~」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://wangzhendong20.github.io/><img src=/img/favicon.png>SleepingFace Blog</a></span><p class=tip><i></i><span>给个赞赏，支持一下作者吧~</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
