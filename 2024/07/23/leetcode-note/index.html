@@ -5544,6 +5544,83 @@ for (int i = 0; i &lt; numCourses; i++) {
 </span></span><span style=display:flex><span>        }
 </span></span><span style=display:flex><span>        
 </span></span><span style=display:flex><span>    }
+</span></span></code></pre></div><h2 id=347-前-k-个高频元素httpsleetcodecnproblemstop-k-frequent-elements-ac><a href=https://leetcode.cn/problems/top-k-frequent-elements/>347. 前 K 个高频元素</a> (ac)</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 哈希表+桶排序
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 首先使用哈希表统计频率，统计完成后，创建一个数组，将频率作为数组下标，对于出现频率不同的数字集合，存入对应的数组下标即可。
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param nums
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param k
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> <span style=color:#50fa7b>topKFrequent</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> nums, <span style=color:#8be9fd>int</span> k) {
+</span></span><span style=display:flex><span>        HashMap<span style=color:#ff79c6>&lt;</span>Integer, Integer<span style=color:#ff79c6>&gt;</span> map <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> HashMap<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> nums.<span style=color:#50fa7b>length</span>; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            map.<span style=color:#50fa7b>put</span>(nums<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>, map.<span style=color:#50fa7b>getOrDefault</span>(nums<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>, 0) <span style=color:#ff79c6>+</span> 1);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;[]</span> bucket <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> List<span style=color:#ff79c6>[</span>nums.<span style=color:#50fa7b>length</span> <span style=color:#ff79c6>+</span> 1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (Map.<span style=color:#50fa7b>Entry</span><span style=color:#ff79c6>&lt;</span>Integer, Integer<span style=color:#ff79c6>&gt;</span> entry : map.<span style=color:#50fa7b>entrySet</span>()) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> value <span style=color:#ff79c6>=</span> entry.<span style=color:#50fa7b>getValue</span>();
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (bucket<span style=color:#ff79c6>[</span>value<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> <span style=color:#ff79c6>null</span>) {
+</span></span><span style=display:flex><span>                bucket<span style=color:#ff79c6>[</span>value<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>            bucket<span style=color:#ff79c6>[</span>value<span style=color:#ff79c6>]</span>.<span style=color:#50fa7b>add</span>(entry.<span style=color:#50fa7b>getKey</span>());
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> ans <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>k<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> index <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> bucket.<span style=color:#50fa7b>length</span> <span style=color:#ff79c6>-</span> 1; i <span style=color:#ff79c6>&gt;=</span> 0 <span style=color:#ff79c6>&amp;&amp;</span> k <span style=color:#ff79c6>&gt;</span> 0; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (bucket<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>continue</span>;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (Integer integer : bucket<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>) {
+</span></span><span style=display:flex><span>                ans<span style=color:#ff79c6>[</span>index<span style=color:#ff79c6>++]</span> <span style=color:#ff79c6>=</span> integer;
+</span></span><span style=display:flex><span>                k<span style=color:#ff79c6>--</span>;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> ans;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Pair</span> {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> num;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> freq;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#50fa7b>Pair</span>(<span style=color:#8be9fd>int</span> num, <span style=color:#8be9fd>int</span> freq) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>num</span> <span style=color:#ff79c6>=</span> num;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>freq</span> <span style=color:#ff79c6>=</span> freq;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 哈希表+大根堆
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param nums
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param k
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> <span style=color:#50fa7b>topKFrequent2</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> nums, <span style=color:#8be9fd>int</span> k) {
+</span></span><span style=display:flex><span>        HashMap<span style=color:#ff79c6>&lt;</span>Integer,Integer<span style=color:#ff79c6>&gt;</span> map <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> HashMap<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> nums.<span style=color:#50fa7b>length</span>; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            map.<span style=color:#50fa7b>put</span>(nums<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>, map.<span style=color:#50fa7b>getOrDefault</span>(nums<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>, 0) <span style=color:#ff79c6>+</span> 1);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        PriorityQueue<span style=color:#ff79c6>&lt;</span><span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]&gt;</span> pq <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> PriorityQueue<span style=color:#ff79c6>&lt;&gt;</span>(<span style=color:#ff79c6>new</span> Comparator<span style=color:#ff79c6>&lt;</span><span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]&gt;</span>() {
+</span></span><span style=display:flex><span>            @Override
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>int</span> <span style=color:#50fa7b>compare</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> o1, <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> o2) {
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>return</span> o2<span style=color:#ff79c6>[</span>1<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>-</span> o1<span style=color:#ff79c6>[</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        });
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        map.<span style=color:#50fa7b>entrySet</span>().<span style=color:#50fa7b>stream</span>().<span style=color:#50fa7b>forEach</span>(entry <span style=color:#ff79c6>-&gt;</span> {
+</span></span><span style=display:flex><span>            pq.<span style=color:#50fa7b>offer</span>(<span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span>{entry.<span style=color:#50fa7b>getKey</span>(),entry.<span style=color:#50fa7b>getValue</span>()});
+</span></span><span style=display:flex><span>        });
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> res <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>k<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> k; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            res<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> pq.<span style=color:#50fa7b>poll</span>()<span style=color:#ff79c6>[</span>0<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> res;
+</span></span><span style=display:flex><span>    }
 </span></span></code></pre></div><div class="entry-shang text-center"><p>「给个赞赏，支持一下作者吧~」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://wangzhendong20.github.io/><img src=/img/favicon.png>SleepingFace Blog</a></span><p class=tip><i></i><span>给个赞赏，支持一下作者吧~</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
