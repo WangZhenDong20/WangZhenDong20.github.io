@@ -139,7 +139,22 @@ post-container"><h1 id=sdk开发>SDK开发</h1><p><strong>前言</strong>：今�
 </span></span><span style=display:flex><span>                .<span style=color:#50fa7b>addHeaders</span>(getHeaderMap(json,name,textType))
 </span></span><span style=display:flex><span>                .<span style=color:#50fa7b>body</span>(json)
 </span></span><span style=display:flex><span>                .<span style=color:#50fa7b>execute</span>();
-</span></span></code></pre></div><h3 id=mvn-install>mvn install</h3><p>我们执行mvn install将它安装为本地的依赖。</p><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/Snipaste_2024-08-03_22-49-04.png alt></p><p><em>要删除Test里的启动类，否则会执行测试。</em></p><p><strong>看到输出BUILD SUCCESS就是成功了。</strong></p><p>打包后的依赖包就会出现在这个位置：</p><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/Snipaste_2024-08-03_22-51-50.png alt></p><h2 id=3-使用sdk>3. 使用SDK</h2><h3 id=引入依赖>引入依赖：</h3><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/API1.png alt></p><h3 id=配置aksk>配置ak/sk</h3><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/API2.png alt></p><h3 id=注入>注入</h3><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/API3.png alt></p><p><strong>就可以使用啦！</strong></p><p><em>文章写的略微粗糙，如有错误请一定更正我哦！</em></p><div class="entry-shang text-center"><p>「给个赞赏，支持一下作者吧~」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+</span></span></code></pre></div><h3 id=mvn-install>mvn install</h3><p>我们执行mvn install将它安装为本地的依赖。</p><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/Snipaste_2024-08-03_22-49-04.png alt></p><p><em>要删除Test里的启动类，否则会执行测试。</em></p><p><strong>看到输出BUILD SUCCESS就是成功了。</strong></p><p>打包后的依赖包就会出现在这个位置：</p><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/Snipaste_2024-08-03_22-51-50.png alt></p><h2 id=3-使用sdk>3. 使用SDK</h2><h3 id=引入依赖>引入依赖：</h3><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/API1.png alt></p><h3 id=配置aksk>配置ak/sk</h3><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/API2.png alt></p><h3 id=创建配置类-1>创建配置类</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Data
+</span></span><span style=display:flex><span>@Configuration
+</span></span><span style=display:flex><span>@ConfigurationProperties(prefix <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;api.client&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>ApiClientConfig</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> String accessKey;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> String secretKey;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @Bean
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> ApiClient <span style=color:#50fa7b>apiClient</span>() {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>new</span> ApiClient(accessKey, secretKey);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=注入>注入</h3><p><img src=/img/2024-08-03-SDK%e5%bc%80%e5%8f%91/API3.png alt></p><p><strong>就可以使用啦！</strong></p><p><em>文章写的略微粗糙，如有错误请一定更正我哦！</em></p><div class="entry-shang text-center"><p>「给个赞赏，支持一下作者吧~」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://wangzhendong20.github.io/><img src=/img/favicon.png>SleepingFace Blog</a></span><p class=tip><i></i><span>给个赞赏，支持一下作者吧~</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
 <button class="btn btn-blink" data-num=10>10元</button>
