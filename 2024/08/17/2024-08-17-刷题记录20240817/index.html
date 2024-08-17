@@ -1,0 +1,286 @@
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta property="og:site_name" content="SleepingFace Blog"><meta property="og:type" content="article"><meta property="og:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta property="twitter:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta name=title content="刷题记录 - 2024/8/17"><meta property="og:title" content="刷题记录 - 2024/8/17"><meta property="twitter:title" content="刷题记录 - 2024/8/17"><meta name=description content="每日leetcode刷题记录"><meta property="og:description" content="每日leetcode刷题记录"><meta property="twitter:description" content="每日leetcode刷题记录"><meta property="twitter:card" content="summary"><meta name=keyword content="WangZhendong"><link rel="shortcut icon" href=/img/favicon.ico><title>刷题记录 - 2024/8/17 | 王振东的博客 | SleepingFace Blog</title>
+<link rel=canonical href=/2024/08/17/2024-08-17-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240817/><link rel=stylesheet href=/css/bootstrap.min.css><link rel=stylesheet href=/css/hugo-theme-cleanwhite.min.css><link rel=stylesheet href=/css/zanshang.css><link rel=stylesheet href=/css/font-awesome.all.min.css><script src=/js/jquery.min.js></script><script src=/js/bootstrap.min.js></script><script src=/js/hux-blog.min.js></script><script src=/js/lazysizes.min.js></script></head><nav class="navbar navbar-default navbar-custom navbar-fixed-top"><div class=container-fluid><div class="navbar-header page-scroll"><button type=button class=navbar-toggle>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+</button>
+<a class=navbar-brand href=/>SleepingFace Blog</a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/>All Posts</a></li><li><a href=/categories/java/>java</a></li><li><a href=/categories/leetcode/>leetcode</a></li><li><a href=/categories/llm/>llm</a></li><li><a href=/categories/other/>other</a></li><li><a href=/categories/tech/>tech</a></li><li><a href=/archive//>ARCHIVE</a></li><li><a href=/notes//>NOTES</a></li><li><a href=/about//>ABOUT</a></li><li><a href=/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/img/home1.jpg)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/java title=Java>Java
+</a><a class=tag href=/tags/leetcode title=LeetCode>LeetCode
+</a><a class=tag href=/tags/%E7%AE%97%E6%B3%95 title=算法>算法</a></div><h1>刷题记录 - 2024/8/17</h1><h2 class=subheading></h2><span class=meta>Posted by
+SleepingFace
+on
+Saturday, August 17, 2024</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+post-container"><h1 id=658-找到-k-个最接近的元素httpsleetcodecnproblemsfind-k-closest-elements><a href=https://leetcode.cn/problems/find-k-closest-elements/>658. 找到 K 个最接近的元素</a></h1><p><em>算术评级：4</em> <strong>中等</strong></p><h2 id=堆>堆</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * heap
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @param arr
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @param k
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @param x
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> */</span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>findClosestElements</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> arr, <span style=color:#8be9fd>int</span> k, <span style=color:#8be9fd>int</span> x) {
+</span></span><span style=display:flex><span>    PriorityQueue<span style=color:#ff79c6>&lt;</span><span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]&gt;</span> pq <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> PriorityQueue<span style=color:#ff79c6>&lt;&gt;</span>(k,(a,b) <span style=color:#ff79c6>-&gt;</span> b<span style=color:#ff79c6>[</span>1<span style=color:#ff79c6>]-</span>a<span style=color:#ff79c6>[</span>1<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> arr.<span style=color:#50fa7b>length</span>; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (pq.<span style=color:#50fa7b>size</span>() <span style=color:#ff79c6>&gt;=</span> k) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (Math.<span style=color:#50fa7b>abs</span>(arr<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>-</span> x) <span style=color:#ff79c6>&lt;</span> Math.<span style=color:#50fa7b>abs</span>(pq.<span style=color:#50fa7b>peek</span>()<span style=color:#ff79c6>[</span>1<span style=color:#ff79c6>]</span>)) {
+</span></span><span style=display:flex><span>                pq.<span style=color:#50fa7b>poll</span>();
+</span></span><span style=display:flex><span>                pq.<span style=color:#50fa7b>offer</span>(<span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span>{arr<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>, Math.<span style=color:#50fa7b>abs</span>(arr<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>-</span> x)});
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>            pq.<span style=color:#50fa7b>offer</span>(<span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span>{arr<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>, Math.<span style=color:#50fa7b>abs</span>(arr<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>-</span> x)});
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> res <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>while</span> (<span style=color:#ff79c6>!</span>pq.<span style=color:#50fa7b>isEmpty</span>()) {
+</span></span><span style=display:flex><span>        res.<span style=color:#50fa7b>add</span>(pq.<span style=color:#50fa7b>poll</span>()<span style=color:#ff79c6>[</span>0<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    Collections.<span style=color:#50fa7b>sort</span>(res);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> res;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=双指针删除元素>双指针删除元素</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * 双指针删除元素
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @param arr
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @param k
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @param x
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> */</span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>findClosestElements2</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> arr, <span style=color:#8be9fd>int</span> k, <span style=color:#8be9fd>int</span> x) {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span> left <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span> right <span style=color:#ff79c6>=</span> arr.<span style=color:#50fa7b>length</span> <span style=color:#ff79c6>-</span> 1;
+</span></span><span style=display:flex><span>    List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> res <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span> removeNum <span style=color:#ff79c6>=</span> arr.<span style=color:#50fa7b>length</span> <span style=color:#ff79c6>-</span> k;
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>while</span> (removeNum<span style=color:#ff79c6>--</span> <span style=color:#ff79c6>&gt;</span> 0) {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (Math.<span style=color:#50fa7b>abs</span>(arr<span style=color:#ff79c6>[</span>left<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>-</span> x) <span style=color:#ff79c6>&lt;=</span> Math.<span style=color:#50fa7b>abs</span>(arr<span style=color:#ff79c6>[</span>right<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>-</span> x)) {
+</span></span><span style=display:flex><span>            right<span style=color:#ff79c6>--</span>;
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>            left<span style=color:#ff79c6>++</span>;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> left; i <span style=color:#ff79c6>&lt;=</span> right; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>        res.<span style=color:#50fa7b>add</span>(arr<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> res;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=二分查找边界>二分查找边界</h2><p><em>题解来源于https://leetcode.cn/problems/find-k-closest-elements/solutions/12476/pai-chu-fa-shuang-zhi-zhen-er-fen-fa-python-dai-ma/</em></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * 二分查找边界
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @param arr
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @param k
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @param x
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> */</span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>findClosestElements3</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> arr, <span style=color:#8be9fd>int</span> k, <span style=color:#8be9fd>int</span> x) {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span> size <span style=color:#ff79c6>=</span> arr.<span style=color:#50fa7b>length</span>;
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span> left <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span> right <span style=color:#ff79c6>=</span> size <span style=color:#ff79c6>-</span> k;
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>while</span> (left <span style=color:#ff79c6>&lt;</span> right) {
+</span></span><span style=display:flex><span>         <span style=color:#8be9fd>int</span> mid <span style=color:#ff79c6>=</span> left <span style=color:#ff79c6>+</span> (right <span style=color:#ff79c6>-</span> left) <span style=color:#ff79c6>/</span> 2;
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 尝试从长度为 k + 1 的连续子区间删除一个元素</span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 从而定位左区间端点的边界值</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (x <span style=color:#ff79c6>-</span> arr<span style=color:#ff79c6>[</span>mid<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&gt;</span> arr<span style=color:#ff79c6>[</span>mid <span style=color:#ff79c6>+</span> k<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>-</span> x) {
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 下一轮搜索区间是 [mid + 1..right]</span>
+</span></span><span style=display:flex><span>            left <span style=color:#ff79c6>=</span> mid <span style=color:#ff79c6>+</span> 1;
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 下一轮搜索区间是 [left..mid]</span>
+</span></span><span style=display:flex><span>            right <span style=color:#ff79c6>=</span> mid;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> res <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> left; i <span style=color:#ff79c6>&lt;</span> left <span style=color:#ff79c6>+</span> k; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>        res.<span style=color:#50fa7b>add</span>(arr<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> res;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h1 id=632-最小区间httpsleetcodecnproblemssmallest-range-covering-elements-from-k-lists><a href=https://leetcode.cn/problems/smallest-range-covering-elements-from-k-lists/>632. 最小区间</a></h1><p><em>算术评级：7</em> <strong>困难</strong></p><h2 id=滑动窗口>滑动窗口</h2><p><em>题解来源于https://leetcode.cn/problems/smallest-range-covering-elements-from-k-lists/solutions/240717/pai-xu-hua-chuang-by-netcan/comments/2205842</em></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * 滑动窗口
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> *     // 核心思路:将每个数及其隶属组存入二维数组,然后按照数字大小升序,
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> *     // (每个一维数组下标0记录数字下标1记录隶属组)
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> *     // 再使用滑动窗口直到包含指定的组,然后再收缩窗口直到数据遍历完毕,取最小区间即可.
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @param nums
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> */</span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> <span style=color:#50fa7b>smallestRange</span>(List<span style=color:#ff79c6>&lt;</span>List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;&gt;</span> nums) {
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>// 数据总数</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span> n <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>for</span>(List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> list : nums){
+</span></span><span style=display:flex><span>        n <span style=color:#ff79c6>+=</span> list.<span style=color:#50fa7b>size</span>();
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>// 二维数组</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span> x <span style=color:#ff79c6>=</span> 0, y <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> ordered <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n<span style=color:#ff79c6>][</span>2<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>for</span>(List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> list : nums){
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span>(Integer tmp : list){
+</span></span><span style=display:flex><span>            ordered<span style=color:#ff79c6>[</span>x<span style=color:#ff79c6>][</span>0<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> tmp;
+</span></span><span style=display:flex><span>            ordered<span style=color:#ff79c6>[</span>x<span style=color:#ff79c6>][</span>1<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> y;
+</span></span><span style=display:flex><span>            x<span style=color:#ff79c6>++</span>;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        y<span style=color:#ff79c6>++</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>// 排序-按照数字排序</span>
+</span></span><span style=display:flex><span>    Arrays.<span style=color:#50fa7b>sort</span>(ordered,(o1,o2) <span style=color:#ff79c6>-&gt;</span> o1<span style=color:#ff79c6>[</span>0<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>-</span> o2<span style=color:#ff79c6>[</span>0<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>// 存储区间结果</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> result <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>2<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>// 统计窗口内每个组所对应数字的具体个数</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> count <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>nums.<span style=color:#50fa7b>size</span>()<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>// 滑动窗口内组的个数</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span> groupSize <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>// 找到指定数量的组后缩小窗口即减少组内元素的数量</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span> tmp <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>for</span>(<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> n; i<span style=color:#ff79c6>++</span>){
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 如果没有记录过这个组则组的数量+1并且标记这个组内的元素数量也+1</span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 否则只记录组内元素数量+1</span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 这一步就是滑动窗口直到包含所有组,组内元素数量一般大于组的个数</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span>(count<span style=color:#ff79c6>[</span>ordered<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>][</span>1<span style=color:#ff79c6>]]++</span> <span style=color:#ff79c6>==</span> 0){
+</span></span><span style=display:flex><span>            groupSize<span style=color:#ff79c6>++</span>;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span>(groupSize <span style=color:#ff79c6>==</span> nums.<span style=color:#50fa7b>size</span>()){
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 找到指定数量的组后缩小窗口即减少组内元素的数量</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>while</span>(count<span style=color:#ff79c6>[</span>ordered<span style=color:#ff79c6>[</span>tmp<span style=color:#ff79c6>][</span>1<span style=color:#ff79c6>]]</span> <span style=color:#ff79c6>&gt;</span> 1){
+</span></span><span style=display:flex><span>                count<span style=color:#ff79c6>[</span>ordered<span style=color:#ff79c6>[</span>tmp<span style=color:#ff79c6>++][</span>1<span style=color:#ff79c6>]]--</span>;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 包含初始条件/后续缩小窗口的结果</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span>((result<span style=color:#ff79c6>[</span>0<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> 0 <span style=color:#ff79c6>&amp;&amp;</span> result<span style=color:#ff79c6>[</span>1<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> 0)
+</span></span><span style=display:flex><span>                    <span style=color:#ff79c6>||</span> result<span style=color:#ff79c6>[</span>1<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>-</span> result<span style=color:#ff79c6>[</span>0<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&gt;</span> ordered<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>][</span>0<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>-</span> ordered<span style=color:#ff79c6>[</span>tmp<span style=color:#ff79c6>][</span>0<span style=color:#ff79c6>]</span>){
+</span></span><span style=display:flex><span>                result <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span>{ordered<span style=color:#ff79c6>[</span>tmp<span style=color:#ff79c6>][</span>0<span style=color:#ff79c6>]</span>,ordered<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>][</span>0<span style=color:#ff79c6>]</span>};
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> result;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h1 id=82-删除排序链表中的重复元素-iihttpsleetcodecnproblemsremove-duplicates-from-sorted-list-ii><a href=https://leetcode.cn/problems/remove-duplicates-from-sorted-list-ii/>82. 删除排序链表中的重复元素 II</a></h1><p><em>算术评级：4</em> <strong>中等</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> ListNode <span style=color:#50fa7b>deleteDuplicates</span>(ListNode head) {
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>if</span> (head <span style=color:#ff79c6>==</span> <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>return</span> head;
+</span></span><span style=display:flex><span>    ListNode dummy <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ListNode(0);
+</span></span><span style=display:flex><span>    dummy.<span style=color:#50fa7b>next</span> <span style=color:#ff79c6>=</span> head;
+</span></span><span style=display:flex><span>    ListNode cur <span style=color:#ff79c6>=</span> head;
+</span></span><span style=display:flex><span>    ListNode pre <span style=color:#ff79c6>=</span> dummy;
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>boolean</span> flag <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>false</span>;
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>while</span> (cur <span style=color:#ff79c6>!=</span> <span style=color:#ff79c6>null</span>) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (cur.<span style=color:#50fa7b>next</span> <span style=color:#ff79c6>==</span> <span style=color:#ff79c6>null</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 到了最后一个节点，如果flag为true，说明有重复的节点，直接删除</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (flag) {
+</span></span><span style=display:flex><span>                pre.<span style=color:#50fa7b>next</span> <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>null</span>;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>break</span>;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 非末尾节点，判断是否有重复</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (cur.<span style=color:#50fa7b>val</span> <span style=color:#ff79c6>==</span> cur.<span style=color:#50fa7b>next</span>.<span style=color:#50fa7b>val</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 有重复, cur继续往后走，flag置为true</span>
+</span></span><span style=display:flex><span>            flag <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>true</span>;
+</span></span><span style=display:flex><span>            cur <span style=color:#ff79c6>=</span> cur.<span style=color:#50fa7b>next</span>;
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 遇到不重复的节点，判断flag是否为true，如果为true，则删除重复节点，刷新flag</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (flag) {
+</span></span><span style=display:flex><span>                pre.<span style=color:#50fa7b>next</span> <span style=color:#ff79c6>=</span> cur.<span style=color:#50fa7b>next</span>;
+</span></span><span style=display:flex><span>                cur <span style=color:#ff79c6>=</span> cur.<span style=color:#50fa7b>next</span>;
+</span></span><span style=display:flex><span>                flag <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>false</span>;
+</span></span><span style=display:flex><span>            } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>                <span style=color:#6272a4>// 否则继续后移</span>
+</span></span><span style=display:flex><span>                pre <span style=color:#ff79c6>=</span> cur;
+</span></span><span style=display:flex><span>                cur <span style=color:#ff79c6>=</span> cur.<span style=color:#50fa7b>next</span>;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> dummy.<span style=color:#50fa7b>next</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h1 id=92-反转链表-iihttpsleetcodecnproblemsreverse-linked-list-ii><a href=https://leetcode.cn/problems/reverse-linked-list-ii/>92. 反转链表 II</a></h1><p><em>算术评级：4</em> <strong>中等</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * 找到切割位置，断链，然后反转，再连接起来
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @param head
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @param left
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @param right
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4> */</span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> ListNode <span style=color:#50fa7b>reverseBetween</span>(ListNode head, <span style=color:#8be9fd>int</span> left, <span style=color:#8be9fd>int</span> right) {
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>if</span> (left <span style=color:#ff79c6>==</span> right <span style=color:#ff79c6>||</span> head.<span style=color:#50fa7b>next</span> <span style=color:#ff79c6>==</span> <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>return</span> head;
+</span></span><span style=display:flex><span>    ListNode dummy <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ListNode(0);
+</span></span><span style=display:flex><span>    dummy.<span style=color:#50fa7b>next</span> <span style=color:#ff79c6>=</span> head;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    ListNode pre <span style=color:#ff79c6>=</span> dummy;
+</span></span><span style=display:flex><span>    ListNode cur <span style=color:#ff79c6>=</span> head;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 1; i <span style=color:#ff79c6>&lt;</span> left <span style=color:#ff79c6>&amp;&amp;</span> cur <span style=color:#ff79c6>!=</span> <span style=color:#ff79c6>null</span>; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>        pre <span style=color:#ff79c6>=</span> cur;
+</span></span><span style=display:flex><span>        cur <span style=color:#ff79c6>=</span> cur.<span style=color:#50fa7b>next</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    pre.<span style=color:#50fa7b>next</span> <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>null</span>;
+</span></span><span style=display:flex><span>    ListNode leftEnd <span style=color:#ff79c6>=</span> pre;
+</span></span><span style=display:flex><span>    ListNode reversedStart <span style=color:#ff79c6>=</span> cur;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> left; i <span style=color:#ff79c6>&lt;</span> right <span style=color:#ff79c6>&amp;&amp;</span> cur <span style=color:#ff79c6>!=</span> <span style=color:#ff79c6>null</span>; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>        cur <span style=color:#ff79c6>=</span> cur.<span style=color:#50fa7b>next</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    ListNode rightStart <span style=color:#ff79c6>=</span> cur.<span style=color:#50fa7b>next</span>;
+</span></span><span style=display:flex><span>    cur.<span style=color:#50fa7b>next</span> <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>null</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    ListNode reversed <span style=color:#ff79c6>=</span> reverse(reversedStart);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    leftEnd.<span style=color:#50fa7b>next</span> <span style=color:#ff79c6>=</span> reversed;
+</span></span><span style=display:flex><span>    reversedStart.<span style=color:#50fa7b>next</span> <span style=color:#ff79c6>=</span> rightStart;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> dummy.<span style=color:#50fa7b>next</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> ListNode <span style=color:#50fa7b>reverse</span>(ListNode head) {
+</span></span><span style=display:flex><span>    ListNode pre <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>null</span>;
+</span></span><span style=display:flex><span>    ListNode cur <span style=color:#ff79c6>=</span> head;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>while</span> (cur <span style=color:#ff79c6>!=</span> <span style=color:#ff79c6>null</span>) {
+</span></span><span style=display:flex><span>        ListNode nextNode <span style=color:#ff79c6>=</span> cur.<span style=color:#50fa7b>next</span>;
+</span></span><span style=display:flex><span>        cur.<span style=color:#50fa7b>next</span> <span style=color:#ff79c6>=</span> pre;
+</span></span><span style=display:flex><span>        pre <span style=color:#ff79c6>=</span> cur;
+</span></span><span style=display:flex><span>        cur <span style=color:#ff79c6>=</span> nextNode;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> pre;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h1 id=103-二叉树的锯齿形层序遍历httpsleetcodecnproblemsbinary-tree-zigzag-level-order-traversal><a href=https://leetcode.cn/problems/binary-tree-zigzag-level-order-traversal/>103. 二叉树的锯齿形层序遍历</a></h1><p><strong>中等</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> List<span style=color:#ff79c6>&lt;</span>List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;&gt;</span> <span style=color:#50fa7b>zigzagLevelOrder</span>(TreeNode root) {
+</span></span><span style=display:flex><span>    List<span style=color:#ff79c6>&lt;</span>List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;&gt;</span> res <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>if</span> (root <span style=color:#ff79c6>==</span> <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>return</span> res;
+</span></span><span style=display:flex><span>    Deque<span style=color:#ff79c6>&lt;</span>TreeNode<span style=color:#ff79c6>&gt;</span> deque <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayDeque<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    deque.<span style=color:#50fa7b>offer</span>(root);
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span> level <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>while</span> (<span style=color:#ff79c6>!</span>deque.<span style=color:#50fa7b>isEmpty</span>()) {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> size <span style=color:#ff79c6>=</span> deque.<span style=color:#50fa7b>size</span>();
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> list <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> size; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            TreeNode node <span style=color:#ff79c6>=</span> deque.<span style=color:#50fa7b>poll</span>();
+</span></span><span style=display:flex><span>            list.<span style=color:#50fa7b>add</span>(node.<span style=color:#50fa7b>val</span>);
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (node.<span style=color:#50fa7b>left</span><span style=color:#ff79c6>!=</span> <span style=color:#ff79c6>null</span>) deque.<span style=color:#50fa7b>offer</span>(node.<span style=color:#50fa7b>left</span>);
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (node.<span style=color:#50fa7b>right</span><span style=color:#ff79c6>!=</span> <span style=color:#ff79c6>null</span>) deque.<span style=color:#50fa7b>offer</span>(node.<span style=color:#50fa7b>right</span>);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (level <span style=color:#ff79c6>%</span> 2 <span style=color:#ff79c6>==</span> 1) {
+</span></span><span style=display:flex><span>            Collections.<span style=color:#50fa7b>reverse</span>(list);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        level<span style=color:#ff79c6>++</span>;
+</span></span><span style=display:flex><span>        res.<span style=color:#50fa7b>add</span>(list);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> res;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class="entry-shang text-center"><p>「给个赞赏，支持一下作者吧~」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+<span class=author><a href=https://wangzhendong20.github.io/><img src=/img/favicon.png>SleepingFace Blog</a></span><p class=tip><i></i><span>给个赞赏，支持一下作者吧~</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
+<button class="btn btn-blink" data-num=5>5元</button>
+<button class="btn btn-blink" data-num=10>10元</button>
+<button class="btn btn-blink" data-num=50>50元</button>
+<button class="btn btn-blink" data-num=100>100元</button>
+<button class="btn btn-blink" data-num=1>任意金额</button></div><div class=zs-modal-pay><button class="btn btn-bred" id=pay-text>2元</button><p>使用<span id=pay-type>微信</span>扫描二维码完成支付</p><img src=/img/reward/wechat-2.png id=pay-image></div></div><div class=zs-modal-footer><label><input type=radio name=zs-type value=wechat class=zs-type checked><span><span class=zs-wechat><img src=/img/reward/wechat-btn.png></span></label>
+<label><input type=radio name=zs-type value=alipay class=zs-type class=zs-alipay><img src=/img/reward/alipay-btn.png></span></label></div></div><script type=text/javascript src=/js/reward.js></script><hr><ul class=pager><li class=previous><a href=/2024/08/15/2024-08-15-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240815/ data-toggle=tooltip data-placement=top title="刷题记录 - 2024/8/15">&larr;
+Previous Post</a></li></ul><script src=https://giscus.app/client.js data-repo=wangzhendong20/wangzhendong20.github.io data-repo-id=***************************** data-category=**************************** data-category-id=************************** data-mapping=pathname data-reactions-enabled=1 data-emit-metadata=0 data-theme=light data-lang=en crossorigin=anonymous async></script></div><div class="col-lg-2 col-lg-offset-0
+visible-lg-block
+sidebar-container
+catalog-container"><div class=side-catalog><hr class="hidden-sm hidden-xs"><h5><a class=catalog-toggle href=#>CATALOG</a></h5><ul class=catalog-body></ul></div></div><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+sidebar-container"><section><hr class="hidden-sm hidden-xs"><h5><a href=/tags/>FEATURED TAGS</a></h5><div class=tags><a href=/tags/java title=java>java
+</a><a href=/tags/leetcode title=leetcode>leetcode
+</a><a href=/tags/%E7%AE%97%E6%B3%95 title=算法>算法</a></div></section><section><hr><h5>FRIENDS</h5><ul class=list-inline><li><a target=_blank href=https://tanxiangyuu.github.io>谭总的博客</a></li></ul></section></div></div></div></article><footer><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><ul class="list-inline text-center"><li><a href=mailto:wangzhendong20@163.com><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-envelope fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://github.com/wangzhendong20><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-github fa-stack-1x fa-inverse"></i></span></a></li><li><a href rel=alternate type=application/rss+xml title="SleepingFace Blog"><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-rss fa-stack-1x fa-inverse"></i></span></a></li></ul><p class="copyright text-muted">&copy; SleepingFace Blog 2024<br><a>欢迎评论哦！</a></p></div></div></div></footer><script>function loadAsync(e,t){var s=document,o="script",n=s.createElement(o),i=s.getElementsByTagName(o)[0];n.src=e,t&&n.addEventListener("load",function(e){t(null,e)},!1),i.parentNode.insertBefore(n,i)}</script><script>$("#tag_cloud").length!==0&&loadAsync("/js/jquery.tagcloud.js",function(){$.fn.tagcloud.defaults={color:{start:"#bbbbee",end:"#0085a1"}},$("#tag_cloud a").tagcloud()})</script><script>loadAsync("https://cdn.jsdelivr.net/npm/fastclick@1.0.6/lib/fastclick.min.js",function(){var e=document.querySelector("nav");e&&FastClick.attach(e)})</script><script>(function(){var t,e=document.createElement("script"),n=window.location.protocol.split(":")[0];n==="https"?e.src="https://zz.bdstatic.com/linksubmit/push.js":e.src="http://push.zhanzhang.baidu.com/push.js",t=document.getElementsByTagName("script")[0],t.parentNode.insertBefore(e,t)})()</script><script>var _baId="8cc115b1ee28b68ce1138a4281875e00",_hmt=_hmt||[];(function(){var e,t=document.createElement("script");t.src="//hm.baidu.com/hm.js?"+_baId,e=document.getElementsByTagName("script")[0],e.parentNode.insertBefore(t,e)})()</script><script type=text/javascript>function generateCatalog(e){_containerSelector="div.post-container";var t,n,s,o,i,a=$(_containerSelector),r=a.find("h1,h2,h3,h4,h5,h6");return $(e).html(""),r.each(function(){t=$(this).prop("tagName").toLowerCase(),o="#"+$(this).prop("id"),n=$(this).text(),i=$('<a href="'+o+'" rel="nofollow">'+n+"</a>"),s=$('<li class="'+t+'_nav"></li>').append(i),$(e).append(s)}),!0}generateCatalog(".catalog-body"),$(".catalog-toggle").click(function(e){e.preventDefault(),$(".side-catalog").toggleClass("fold")}),loadAsync("/js/jquery.nav.js",function(){$(".catalog-body").onePageNav({currentClass:"active",changeHash:!1,easing:"swing",filter:"",scrollSpeed:700,scrollOffset:0,scrollThreshold:.2,begin:null,end:null,scrollChange:null,padding:80})})</script></body></html>
