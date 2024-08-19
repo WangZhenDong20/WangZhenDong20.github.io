@@ -259,6 +259,43 @@ post-container"><p><em>今天主要是图论的题目，学习了二分图，也
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>true</span>;
 </span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h1 id=787-k-站中转内最便宜的航班httpsleetcodecnproblemscheapest-flights-within-k-stops><a href=https://leetcode.cn/problems/cheapest-flights-within-k-stops/>787. K 站中转内最便宜的航班</a></h1><p><em>x</em></p><p><em>算术评级：5</em> <strong>中等</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>middle787</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * Bellman_ford之单源有限最短路
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 模板题
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param n
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param flights
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param src
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param dst
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param k
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>int</span> <span style=color:#50fa7b>findCheapestPrice</span>(<span style=color:#8be9fd>int</span> n, <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> flights, <span style=color:#8be9fd>int</span> src, <span style=color:#8be9fd>int</span> dst, <span style=color:#8be9fd>int</span> k) {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> misDist <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        Arrays.<span style=color:#50fa7b>fill</span>(misDist,Integer.<span style=color:#50fa7b>MAX_VALUE</span>);
+</span></span><span style=display:flex><span>        misDist<span style=color:#ff79c6>[</span>src<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 1; i <span style=color:#ff79c6>&lt;=</span> k<span style=color:#ff79c6>+</span>1; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> misDist_copy <span style=color:#ff79c6>=</span> misDist.<span style=color:#50fa7b>clone</span>(); <span style=color:#6272a4>// 获取上一次计算的结果</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> flight : flights) {
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> start <span style=color:#ff79c6>=</span> flight<span style=color:#ff79c6>[</span>0<span style=color:#ff79c6>]</span>, end <span style=color:#ff79c6>=</span> flight<span style=color:#ff79c6>[</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> price <span style=color:#ff79c6>=</span> flight<span style=color:#ff79c6>[</span>2<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>                <span style=color:#6272a4>// 注意使用 minDist_copy 来计算 minDist</span>
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (misDist_copy<span style=color:#ff79c6>[</span>start<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>!=</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span> <span style=color:#ff79c6>&amp;&amp;</span> misDist<span style=color:#ff79c6>[</span>end<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>&gt;</span> misDist_copy<span style=color:#ff79c6>[</span>start<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> price) {
+</span></span><span style=display:flex><span>                    misDist<span style=color:#ff79c6>[</span>end<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> misDist_copy<span style=color:#ff79c6>[</span>start<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>+</span> price;
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (misDist<span style=color:#ff79c6>[</span>dst<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> Integer.<span style=color:#50fa7b>MAX_VALUE</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>-</span>1;
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>else</span> {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span> misDist<span style=color:#ff79c6>[</span>dst<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
 </span></span></code></pre></div><div class="entry-shang text-center"><p>「给个赞赏，支持一下作者吧~」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
 <span class=author><a href=https://wangzhendong20.github.io/><img src=/img/favicon.png>SleepingFace Blog</a></span><p class=tip><i></i><span>给个赞赏，支持一下作者吧~</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
 <button class="btn btn-blink" data-num=5>5元</button>
