@@ -1,0 +1,332 @@
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta property="og:site_name" content="SleepingFace Blog"><meta property="og:type" content="article"><meta property="og:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta property="twitter:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta name=title content="基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存"><meta property="og:title" content="基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存"><meta property="twitter:title" content="基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存"><meta name=description content="基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存，并通过自定义 Redis Key  Generator 来根据类和方法自动生成 key。"><meta property="og:description" content="基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存，并通过自定义 Redis Key  Generator 来根据类和方法自动生成 key。"><meta property="twitter:description" content="基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存，并通过自定义 Redis Key  Generator 来根据类和方法自动生成 key。"><meta property="twitter:card" content="summary"><meta name=keyword content="WangZhendong"><link rel="shortcut icon" href=/img/favicon.ico><title>基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存 | 王振东的博客 | SleepingFace Blog</title>
+<link rel=canonical href=/2024/08/19/2024-08-19-%E5%9F%BA%E4%BA%8ESpringCache%E6%B3%A8%E8%A7%A3%E5%92%8CRedis%E5%AE%9E%E7%8E%B0%E5%AF%B9%E6%95%B0%E6%8D%AE%E5%AD%97%E5%85%B8%E7%9A%84%E8%87%AA%E5%8A%A8%E7%BC%93%E5%AD%98/><link rel=stylesheet href=/css/bootstrap.min.css><link rel=stylesheet href=/css/hugo-theme-cleanwhite.min.css><link rel=stylesheet href=/css/zanshang.css><link rel=stylesheet href=/css/font-awesome.all.min.css><script src=/js/jquery.min.js></script><script src=/js/bootstrap.min.js></script><script src=/js/hux-blog.min.js></script><script src=/js/lazysizes.min.js></script></head><nav class="navbar navbar-default navbar-custom navbar-fixed-top"><div class=container-fluid><div class="navbar-header page-scroll"><button type=button class=navbar-toggle>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+</button>
+<a class=navbar-brand href=/>SleepingFace Blog</a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/>All Posts</a></li><li><a href=/categories/java/>java</a></li><li><a href=/categories/leetcode/>leetcode</a></li><li><a href=/categories/llm/>llm</a></li><li><a href=/categories/other/>other</a></li><li><a href=/categories/tech/>tech</a></li><li><a href=/archive//>ARCHIVE</a></li><li><a href=/notes//>NOTES</a></li><li><a href=/about//>ABOUT</a></li><li><a href=/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/img/home1.jpg)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/java title=Java>Java
+</a><a class=tag href=/tags/redis title=Redis>Redis
+</a><a class=tag href=/tags/spring-cache title="Spring Cache">Spring Cache</a></div><h1>基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存</h1><h2 class=subheading></h2><span class=meta>Posted by
+SleepingFace
+on
+Monday, August 19, 2024</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+post-container"><h1 id=基于-spring-cache-注解--redis-实现对数据字典的自动缓存>基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存</h1><hr><p><em>前言：</em> 基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存，并通过自定义 Redis Key Generator 来根据类和方法自动生成 key。</p><hr><h2 id=1-实体类>1. 实体类</h2><h3 id=dict>Dict</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Data
+</span></span><span style=display:flex><span>@ApiModel(description <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;数据字典&#34;</span>)
+</span></span><span style=display:flex><span>@TableName(<span style=color:#f1fa8c>&#34;dict&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Dict</span> { <span style=color:#6272a4>//不继承baseEntity</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd;font-style:italic>final</span> <span style=color:#8be9fd>long</span> serialVersionUID <span style=color:#ff79c6>=</span> 1L;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @ApiModelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;id&#34;</span>) <span style=color:#6272a4>//去掉了自动增长</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> Long id;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @ApiModelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;创建时间&#34;</span>)
+</span></span><span style=display:flex><span>    @JsonFormat(pattern <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;yyyy-MM-dd HH:mm:ss&#34;</span>)
+</span></span><span style=display:flex><span>    @TableField(<span style=color:#f1fa8c>&#34;create_time&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> Date createTime;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @ApiModelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;更新时间&#34;</span>)
+</span></span><span style=display:flex><span>    @TableField(<span style=color:#f1fa8c>&#34;update_time&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> Date updateTime;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @ApiModelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;逻辑删除(1:已删除，0:未删除)&#34;</span>)
+</span></span><span style=display:flex><span>    @TableLogic
+</span></span><span style=display:flex><span>    @TableField(<span style=color:#f1fa8c>&#34;is_deleted&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> Integer isDeleted;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @ApiModelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;其他参数&#34;</span>)
+</span></span><span style=display:flex><span>    @TableField(exist <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>false</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> Map<span style=color:#ff79c6>&lt;</span>String,Object<span style=color:#ff79c6>&gt;</span> param <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> HashMap<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @ApiModelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;上级id&#34;</span>)
+</span></span><span style=display:flex><span>    @TableField(<span style=color:#f1fa8c>&#34;parent_id&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> Long parentId;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @ApiModelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;名称&#34;</span>)
+</span></span><span style=display:flex><span>    @TableField(<span style=color:#f1fa8c>&#34;name&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> String name;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @ApiModelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;值&#34;</span>)
+</span></span><span style=display:flex><span>    @TableField(<span style=color:#f1fa8c>&#34;value&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> String value;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @ApiModelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;编码&#34;</span>)
+</span></span><span style=display:flex><span>    @TableField(<span style=color:#f1fa8c>&#34;dict_code&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> String dictCode;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @ApiModelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;是否包含子节点&#34;</span>)
+</span></span><span style=display:flex><span>    @TableField(exist <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>false</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#8be9fd>boolean</span> hasChildren;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><strong>上级id，通过id与parent_id构建上下级关系</strong></p><h3 id=dicteevo>DictEeVo</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Data
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>DictEeVo</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	@ExcelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;id&#34;</span> ,index <span style=color:#ff79c6>=</span> 0)
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>private</span> Long id;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	@ExcelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;上级id&#34;</span> ,index <span style=color:#ff79c6>=</span> 1)
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>private</span> Long parentId;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	@ExcelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;名称&#34;</span> ,index <span style=color:#ff79c6>=</span> 2)
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>private</span> String name;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	@ExcelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;值&#34;</span> ,index <span style=color:#ff79c6>=</span> 3)
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>private</span> String value;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	@ExcelProperty(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;编码&#34;</span> ,index <span style=color:#ff79c6>=</span> 4)
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>private</span> String dictCode;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><hr><h2 id=2-数据字典接口实现>2. 数据字典接口实现</h2><p><strong>DictController</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Api(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;数据字典接口&#34;</span>)
+</span></span><span style=display:flex><span>@RestController
+</span></span><span style=display:flex><span>@RequestMapping(<span style=color:#f1fa8c>&#34;/admin/cmn/dict&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>DictController</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @Autowired
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> DictService dictService;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//根据数据id查询子数据列表</span>
+</span></span><span style=display:flex><span>    @ApiOperation(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;根据数据id查询子数据列表&#34;</span>)
+</span></span><span style=display:flex><span>    @GetMapping(<span style=color:#f1fa8c>&#34;findChildData/{id}&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> Result <span style=color:#50fa7b>findChildData</span>(@PathVariable Long id) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span> list <span style=color:#ff79c6>=</span> dictService.<span style=color:#50fa7b>findChildData</span>(id);
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> Result.<span style=color:#50fa7b>ok</span>(list);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><strong>DictServiceImpl</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>DictServiceImpl</span> <span style=color:#8be9fd;font-style:italic>extends</span> ServiceImpl<span style=color:#ff79c6>&lt;</span>DictMapper, Dict<span style=color:#ff79c6>&gt;</span> <span style=color:#8be9fd;font-style:italic>implements</span> DictService {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @Override
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> List<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>findChildData</span>(Long id) {
+</span></span><span style=display:flex><span>        QueryWrapper<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span> wrapper <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> QueryWrapper<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        wrapper.<span style=color:#50fa7b>eq</span>(<span style=color:#f1fa8c>&#34;parent_id&#34;</span>,id);
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span> dictList <span style=color:#ff79c6>=</span> baseMapper.<span style=color:#50fa7b>selectList</span>(wrapper).<span style=color:#50fa7b>stream</span>().<span style=color:#50fa7b>map</span>(dict <span style=color:#ff79c6>-&gt;</span> {
+</span></span><span style=display:flex><span>            Long dictId <span style=color:#ff79c6>=</span> dict.<span style=color:#50fa7b>getId</span>();
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>boolean</span> isChild <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>isChildren</span>(dictId);
+</span></span><span style=display:flex><span>            dict.<span style=color:#50fa7b>setHasChildren</span>(isChild);
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span> dict;
+</span></span><span style=display:flex><span>        }).<span style=color:#50fa7b>collect</span>(Collectors.<span style=color:#50fa7b>toList</span>());
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> dictList;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>	
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>//是否有下级</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#8be9fd>boolean</span> <span style=color:#50fa7b>isChildren</span>(Long dictId) {
+</span></span><span style=display:flex><span>        QueryWrapper<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span> wrapper <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> QueryWrapper<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        wrapper.<span style=color:#50fa7b>eq</span>(<span style=color:#f1fa8c>&#34;parent_id&#34;</span>,dictId);
+</span></span><span style=display:flex><span>        Integer count <span style=color:#ff79c6>=</span> baseMapper.<span style=color:#50fa7b>selectCount</span>(wrapper);
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> count <span style=color:#ff79c6>&gt;</span> 0;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><hr><h2 id=3-easyexcel>3. EasyExcel</h2><h3 id=数据字典导出>数据字典导出</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>//**DictController**</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>//导出数据字典接口</span>
+</span></span><span style=display:flex><span>    @GetMapping(<span style=color:#f1fa8c>&#34;exportData&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> Result <span style=color:#50fa7b>exportDict</span>(HttpServletResponse response) {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> dictService.<span style=color:#50fa7b>exportDict</span>(response);
+</span></span><span style=display:flex><span>    }
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>//**DictServiceImpl**</span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> Result <span style=color:#50fa7b>exportDict</span>(HttpServletResponse response) {
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>//设置下载信息</span>
+</span></span><span style=display:flex><span>        response.<span style=color:#50fa7b>setContentType</span>(<span style=color:#f1fa8c>&#34;application/vnd.ms-excel&#34;</span>);
+</span></span><span style=display:flex><span>        response.<span style=color:#50fa7b>setCharacterEncoding</span>(<span style=color:#f1fa8c>&#34;utf-8&#34;</span>);
+</span></span><span style=display:flex><span>        String fileName <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;dict&#34;</span>;
+</span></span><span style=display:flex><span>        response.<span style=color:#50fa7b>setHeader</span>(<span style=color:#f1fa8c>&#34;Content-disposition&#34;</span>, <span style=color:#f1fa8c>&#34;attachment;filename=&#34;</span><span style=color:#ff79c6>+</span> fileName <span style=color:#ff79c6>+</span> <span style=color:#f1fa8c>&#34;.xlsx&#34;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        List<span style=color:#ff79c6>&lt;</span>DictEeVo<span style=color:#ff79c6>&gt;</span> dictEeVoList <span style=color:#ff79c6>=</span> baseMapper.<span style=color:#50fa7b>selectList</span>(<span style=color:#ff79c6>null</span>)
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>stream</span>().<span style=color:#50fa7b>map</span>(dict <span style=color:#ff79c6>-&gt;</span> BeanUtil.<span style=color:#50fa7b>copyProperties</span>(dict, DictEeVo.<span style=color:#50fa7b>class</span>))
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>collect</span>(Collectors.<span style=color:#50fa7b>toList</span>());
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>try</span> {
+</span></span><span style=display:flex><span>            EasyExcel.<span style=color:#50fa7b>write</span>(response.<span style=color:#50fa7b>getOutputStream</span>(),DictEeVo.<span style=color:#50fa7b>class</span>).<span style=color:#50fa7b>sheet</span>(<span style=color:#f1fa8c>&#34;dict&#34;</span>)
+</span></span><span style=display:flex><span>                    .<span style=color:#50fa7b>doWrite</span>(dictEeVoList);
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>catch</span> (Exception e) {
+</span></span><span style=display:flex><span>            e.<span style=color:#50fa7b>printStackTrace</span>();
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> MyException(<span style=color:#f1fa8c>&#34;失败&#34;</span>,201);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> Result.<span style=color:#50fa7b>ok</span>();
+</span></span><span style=display:flex><span>    }
+</span></span></code></pre></div><h3 id=数据字典导入>数据字典导入</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>//**DictController**</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>//导入数据字典接口</span>
+</span></span><span style=display:flex><span>    @PostMapping(<span style=color:#f1fa8c>&#34;importData&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> Result <span style=color:#50fa7b>importDict</span>(MultipartFile file) {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> dictService.<span style=color:#50fa7b>importDict</span>(file);
+</span></span><span style=display:flex><span>    }
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>//**DictServiceImpl**</span>
+</span></span><span style=display:flex><span>@Override
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> Result <span style=color:#50fa7b>importDict</span>(MultipartFile file) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>try</span> {
+</span></span><span style=display:flex><span>            EasyExcel.<span style=color:#50fa7b>read</span>(file.<span style=color:#50fa7b>getInputStream</span>(),DictEeVo.<span style=color:#50fa7b>class</span>,<span style=color:#ff79c6>new</span> DictListener(baseMapper))
+</span></span><span style=display:flex><span>                    .<span style=color:#50fa7b>sheet</span>().<span style=color:#50fa7b>doRead</span>();
+</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>catch</span> (Exception e) {
+</span></span><span style=display:flex><span>            e.<span style=color:#50fa7b>printStackTrace</span>();
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> MyException(<span style=color:#f1fa8c>&#34;失败&#34;</span>,201);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> Result.<span style=color:#50fa7b>ok</span>();
+</span></span><span style=display:flex><span>    }
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>//**listener -&gt; DictListener**</span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>DictListener</span> <span style=color:#8be9fd;font-style:italic>extends</span> AnalysisEventListener<span style=color:#ff79c6>&lt;</span>DictEeVo<span style=color:#ff79c6>&gt;</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> DictMapper dictMapper;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#50fa7b>DictListener</span>(DictMapper dictMapper) {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>dictMapper</span> <span style=color:#ff79c6>=</span> dictMapper;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @Override
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>invoke</span>(DictEeVo dictEeVo, AnalysisContext analysisContext) {
+</span></span><span style=display:flex><span>        Dict dict <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Dict();
+</span></span><span style=display:flex><span>        BeanUtil.<span style=color:#50fa7b>copyProperties</span>(dictEeVo, dict);
+</span></span><span style=display:flex><span>        dictMapper.<span style=color:#50fa7b>insert</span>(dict);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    @Override
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>doAfterAllAnalysed</span>(AnalysisContext analysisContext) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><hr><h2 id=4-spring-cache--redis-缓存数据>4. Spring Cache + Redis 缓存数据</h2><h3 id=添加依赖>添加依赖</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-xml data-lang=xml><span style=display:flex><span><span style=color:#ff79c6>&lt;dependency&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;groupId&gt;</span>org.springframework.boot<span style=color:#ff79c6>&lt;/groupId&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;artifactId&gt;</span>spring-boot-starter-data-redis<span style=color:#ff79c6>&lt;/artifactId&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;/dependency&gt;</span>
+</span></span></code></pre></div><h3 id=添加配置类>添加配置类</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Configuration
+</span></span><span style=display:flex><span>@EnableCaching
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>RedisConfig</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 自定义key规则
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    @Bean
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> KeyGenerator <span style=color:#50fa7b>keyGenerator</span>() {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>new</span> KeyGenerator() {
+</span></span><span style=display:flex><span>            @Override
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd;font-style:italic>public</span> Object <span style=color:#50fa7b>generate</span>(Object target, Method method, Object... params) {
+</span></span><span style=display:flex><span>                StringBuilder sb <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> StringBuilder();
+</span></span><span style=display:flex><span>                sb.<span style=color:#50fa7b>append</span>(target.<span style=color:#50fa7b>getClass</span>().<span style=color:#50fa7b>getName</span>());
+</span></span><span style=display:flex><span>                sb.<span style=color:#50fa7b>append</span>(method.<span style=color:#50fa7b>getName</span>());
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>for</span> (Object obj : params) {
+</span></span><span style=display:flex><span>                    sb.<span style=color:#50fa7b>append</span>(obj.<span style=color:#50fa7b>toString</span>());
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>return</span> sb.<span style=color:#50fa7b>toString</span>();
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        };
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 设置RedisTemplate规则
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param redisConnectionFactory
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    @Bean
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> RedisTemplate<span style=color:#ff79c6>&lt;</span>Object, Object<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>redisTemplate</span>(RedisConnectionFactory redisConnectionFactory) {
+</span></span><span style=display:flex><span>        RedisTemplate<span style=color:#ff79c6>&lt;</span>Object, Object<span style=color:#ff79c6>&gt;</span> redisTemplate <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> RedisTemplate<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        redisTemplate.<span style=color:#50fa7b>setConnectionFactory</span>(redisConnectionFactory);
+</span></span><span style=display:flex><span>        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Jackson2JsonRedisSerializer(Object.<span style=color:#50fa7b>class</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>//解决查询缓存转换异常的问题</span>
+</span></span><span style=display:flex><span>        ObjectMapper om <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ObjectMapper();
+</span></span><span style=display:flex><span><span style=color:#6272a4>// 指定要序列化的域，field,get和set,以及修饰符范围，ANY是都有包括private和public</span>
+</span></span><span style=display:flex><span>        om.<span style=color:#50fa7b>setVisibility</span>(PropertyAccessor.<span style=color:#50fa7b>ALL</span>, JsonAutoDetect.<span style=color:#50fa7b>Visibility</span>.<span style=color:#50fa7b>ANY</span>);
+</span></span><span style=display:flex><span><span style=color:#6272a4>// 指定序列化输入的类型，类必须是非final修饰的，final修饰的类，比如String,Integer等会跑出异常</span>
+</span></span><span style=display:flex><span>        om.<span style=color:#50fa7b>enableDefaultTyping</span>(ObjectMapper.<span style=color:#50fa7b>DefaultTyping</span>.<span style=color:#50fa7b>NON_FINAL</span>);
+</span></span><span style=display:flex><span>        jackson2JsonRedisSerializer.<span style=color:#50fa7b>setObjectMapper</span>(om);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>//序列号key value</span>
+</span></span><span style=display:flex><span>        redisTemplate.<span style=color:#50fa7b>setKeySerializer</span>(<span style=color:#ff79c6>new</span> StringRedisSerializer());
+</span></span><span style=display:flex><span>        redisTemplate.<span style=color:#50fa7b>setValueSerializer</span>(jackson2JsonRedisSerializer);
+</span></span><span style=display:flex><span>        redisTemplate.<span style=color:#50fa7b>setHashKeySerializer</span>(<span style=color:#ff79c6>new</span> StringRedisSerializer());
+</span></span><span style=display:flex><span>        redisTemplate.<span style=color:#50fa7b>setHashValueSerializer</span>(jackson2JsonRedisSerializer);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        redisTemplate.<span style=color:#50fa7b>afterPropertiesSet</span>();
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> redisTemplate;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 设置CacheManager缓存规则
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param factory
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    @Bean
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> CacheManager <span style=color:#50fa7b>cacheManager</span>(RedisConnectionFactory factory) {
+</span></span><span style=display:flex><span>        RedisSerializer<span style=color:#ff79c6>&lt;</span>String<span style=color:#ff79c6>&gt;</span> redisSerializer <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> StringRedisSerializer();
+</span></span><span style=display:flex><span>        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Jackson2JsonRedisSerializer(Object.<span style=color:#50fa7b>class</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>//解决查询缓存转换异常的问题</span>
+</span></span><span style=display:flex><span>        ObjectMapper om <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ObjectMapper();
+</span></span><span style=display:flex><span>        om.<span style=color:#50fa7b>setVisibility</span>(PropertyAccessor.<span style=color:#50fa7b>ALL</span>, JsonAutoDetect.<span style=color:#50fa7b>Visibility</span>.<span style=color:#50fa7b>ANY</span>);
+</span></span><span style=display:flex><span>        om.<span style=color:#50fa7b>enableDefaultTyping</span>(ObjectMapper.<span style=color:#50fa7b>DefaultTyping</span>.<span style=color:#50fa7b>NON_FINAL</span>);
+</span></span><span style=display:flex><span>        jackson2JsonRedisSerializer.<span style=color:#50fa7b>setObjectMapper</span>(om);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>// 配置序列化（解决乱码的问题）,过期时间600秒</span>
+</span></span><span style=display:flex><span>        RedisCacheConfiguration config <span style=color:#ff79c6>=</span> RedisCacheConfiguration.<span style=color:#50fa7b>defaultCacheConfig</span>()
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>entryTtl</span>(Duration.<span style=color:#50fa7b>ofSeconds</span>(600))
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>serializeKeysWith</span>(RedisSerializationContext.<span style=color:#50fa7b>SerializationPair</span>.<span style=color:#50fa7b>fromSerializer</span>(redisSerializer))
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>serializeValuesWith</span>(RedisSerializationContext.<span style=color:#50fa7b>SerializationPair</span>.<span style=color:#50fa7b>fromSerializer</span>(jackson2JsonRedisSerializer))
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>disableCachingNullValues</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        RedisCacheManager cacheManager <span style=color:#ff79c6>=</span> RedisCacheManager.<span style=color:#50fa7b>builder</span>(factory)
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>cacheDefaults</span>(config)
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>build</span>();
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> cacheManager;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=添加redis配置>添加redis配置</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-xml data-lang=xml><span style=display:flex><span>spring.redis.host=localhost
+</span></span><span style=display:flex><span>spring.redis.port=6379
+</span></span><span style=display:flex><span>spring.redis.database= 0
+</span></span><span style=display:flex><span>spring.redis.timeout=1800000
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>spring.redis.lettuce.pool.max-active=20
+</span></span><span style=display:flex><span>spring.redis.lettuce.pool.max-wait=-1
+</span></span><span style=display:flex><span>spring.redis.lettuce.pool.max-idle=5
+</span></span><span style=display:flex><span>spring.redis.lettuce.pool.min-idle=0
+</span></span></code></pre></div><h3 id=使用spring-cache>使用Spring Cache</h3><h4 id=常用缓存标签>常用缓存标签</h4><h5 id=1-cacheable>1. @Cacheable</h5><p><strong>@Cacheable</strong>：根据方法对其返回结果进行缓存，下次请求时，如果缓存存在，则直接读取缓存数据返回；如果缓存不存在，则执行方法，并把返回的结果存入缓存中。一般用在查询方法上。</p><h5 id=2-cacheput>2. @CachePut</h5><p><strong>@CachePut</strong>：使用该注解标志的方法，每次都会执行，并将结果存入指定的缓存中。其他方法可以直接从响应的缓存中读取缓存数据，而不需要再去查询数据库。一般用在新增方法上。</p><h5 id=3-cacheevict>3. @CacheEvict</h5><p><strong>@CacheEvict</strong>：使用该注解标志的方法，会清空指定的缓存。一般用在更新或者删除方法上。</p><h4 id=代码实现>代码实现</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Override
+</span></span><span style=display:flex><span>@Cacheable(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;dict&#34;</span>,keyGenerator <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;keyGenerator&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> List<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span> <span style=color:#50fa7b>findChildData</span>(Long id) {
+</span></span><span style=display:flex><span>    QueryWrapper<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span> wrapper <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> QueryWrapper<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>    wrapper.<span style=color:#50fa7b>eq</span>(<span style=color:#f1fa8c>&#34;parent_id&#34;</span>,id);
+</span></span><span style=display:flex><span>    List<span style=color:#ff79c6>&lt;</span>Dict<span style=color:#ff79c6>&gt;</span> dictList <span style=color:#ff79c6>=</span> baseMapper.<span style=color:#50fa7b>selectList</span>(wrapper).<span style=color:#50fa7b>stream</span>().<span style=color:#50fa7b>map</span>(dict <span style=color:#ff79c6>-&gt;</span> {
+</span></span><span style=display:flex><span>        Long dictId <span style=color:#ff79c6>=</span> dict.<span style=color:#50fa7b>getId</span>();
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>boolean</span> isChild <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>this</span>.<span style=color:#50fa7b>isChildren</span>(dictId);
+</span></span><span style=display:flex><span>        dict.<span style=color:#50fa7b>setHasChildren</span>(isChild);
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> dict;
+</span></span><span style=display:flex><span>    }).<span style=color:#50fa7b>collect</span>(Collectors.<span style=color:#50fa7b>toList</span>());
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> dictList;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>@Override
+</span></span><span style=display:flex><span>@CacheEvict(value <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;dict&#34;</span>, allEntries <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>true</span>)
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> Result <span style=color:#50fa7b>importDict</span>(MultipartFile file) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>try</span> {
+</span></span><span style=display:flex><span>        EasyExcel.<span style=color:#50fa7b>read</span>(file.<span style=color:#50fa7b>getInputStream</span>(),DictEeVo.<span style=color:#50fa7b>class</span>,<span style=color:#ff79c6>new</span> DictListener(baseMapper))
+</span></span><span style=display:flex><span>                .<span style=color:#50fa7b>sheet</span>().<span style=color:#50fa7b>doRead</span>();
+</span></span><span style=display:flex><span>    } <span style=color:#ff79c6>catch</span> (Exception e) {
+</span></span><span style=display:flex><span>        e.<span style=color:#50fa7b>printStackTrace</span>();
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> MyException(<span style=color:#f1fa8c>&#34;失败&#34;</span>,201);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> Result.<span style=color:#50fa7b>ok</span>();
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class="entry-shang text-center"><p>「给个赞赏，支持一下作者吧~」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+<span class=author><a href=https://wangzhendong20.github.io/><img src=/img/favicon.png>SleepingFace Blog</a></span><p class=tip><i></i><span>给个赞赏，支持一下作者吧~</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
+<button class="btn btn-blink" data-num=5>5元</button>
+<button class="btn btn-blink" data-num=10>10元</button>
+<button class="btn btn-blink" data-num=50>50元</button>
+<button class="btn btn-blink" data-num=100>100元</button>
+<button class="btn btn-blink" data-num=1>任意金额</button></div><div class=zs-modal-pay><button class="btn btn-bred" id=pay-text>2元</button><p>使用<span id=pay-type>微信</span>扫描二维码完成支付</p><img src=/img/reward/wechat-2.png id=pay-image></div></div><div class=zs-modal-footer><label><input type=radio name=zs-type value=wechat class=zs-type checked><span><span class=zs-wechat><img src=/img/reward/wechat-btn.png></span></label>
+<label><input type=radio name=zs-type value=alipay class=zs-type class=zs-alipay><img src=/img/reward/alipay-btn.png></span></label></div></div><script type=text/javascript src=/js/reward.js></script><hr><ul class=pager><li class=previous><a href=/2024/08/18/2024-08-18-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240818/ data-toggle=tooltip data-placement=top title="leetcode打卡 - 2024/8/18">&larr;
+Previous Post</a></li><li class=next><a href=/2024/08/19/2024-08-19-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240819/ data-toggle=tooltip data-placement=top title="leetcode打卡 - 2024/8/19">Next
+Post &rarr;</a></li></ul><script src=https://giscus.app/client.js data-repo=wangzhendong20/wangzhendong20.github.io data-repo-id=***************************** data-category=**************************** data-category-id=************************** data-mapping=pathname data-reactions-enabled=1 data-emit-metadata=0 data-theme=light data-lang=en crossorigin=anonymous async></script></div><div class="col-lg-2 col-lg-offset-0
+visible-lg-block
+sidebar-container
+catalog-container"><div class=side-catalog><hr class="hidden-sm hidden-xs"><h5><a class=catalog-toggle href=#>CATALOG</a></h5><ul class=catalog-body></ul></div></div><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+sidebar-container"><section><hr class="hidden-sm hidden-xs"><h5><a href=/tags/>FEATURED TAGS</a></h5><div class=tags><a href=/tags/java title=java>java
+</a><a href=/tags/leetcode title=leetcode>leetcode
+</a><a href=/tags/%E7%AE%97%E6%B3%95 title=算法>算法
+</a><a href=/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F title=设计模式>设计模式</a></div></section><section><hr><h5>FRIENDS</h5><ul class=list-inline><li><a target=_blank href=https://tanxiangyuu.github.io>谭总的博客</a></li></ul></section></div></div></div></article><footer><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><ul class="list-inline text-center"><li><a href=mailto:wangzhendong20@163.com><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-envelope fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://github.com/wangzhendong20><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-github fa-stack-1x fa-inverse"></i></span></a></li><li><a href rel=alternate type=application/rss+xml title="SleepingFace Blog"><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-rss fa-stack-1x fa-inverse"></i></span></a></li></ul><p class="copyright text-muted">&copy; SleepingFace Blog 2024<br><a>欢迎评论哦！</a></p></div></div></div></footer><script>function loadAsync(e,t){var s=document,o="script",n=s.createElement(o),i=s.getElementsByTagName(o)[0];n.src=e,t&&n.addEventListener("load",function(e){t(null,e)},!1),i.parentNode.insertBefore(n,i)}</script><script>$("#tag_cloud").length!==0&&loadAsync("/js/jquery.tagcloud.js",function(){$.fn.tagcloud.defaults={color:{start:"#bbbbee",end:"#0085a1"}},$("#tag_cloud a").tagcloud()})</script><script>loadAsync("https://cdn.jsdelivr.net/npm/fastclick@1.0.6/lib/fastclick.min.js",function(){var e=document.querySelector("nav");e&&FastClick.attach(e)})</script><script>(function(){var t,e=document.createElement("script"),n=window.location.protocol.split(":")[0];n==="https"?e.src="https://zz.bdstatic.com/linksubmit/push.js":e.src="http://push.zhanzhang.baidu.com/push.js",t=document.getElementsByTagName("script")[0],t.parentNode.insertBefore(e,t)})()</script><script>var _baId="8cc115b1ee28b68ce1138a4281875e00",_hmt=_hmt||[];(function(){var e,t=document.createElement("script");t.src="//hm.baidu.com/hm.js?"+_baId,e=document.getElementsByTagName("script")[0],e.parentNode.insertBefore(t,e)})()</script><script type=text/javascript>function generateCatalog(e){_containerSelector="div.post-container";var t,n,s,o,i,a=$(_containerSelector),r=a.find("h1,h2,h3,h4,h5,h6");return $(e).html(""),r.each(function(){t=$(this).prop("tagName").toLowerCase(),o="#"+$(this).prop("id"),n=$(this).text(),i=$('<a href="'+o+'" rel="nofollow">'+n+"</a>"),s=$('<li class="'+t+'_nav"></li>').append(i),$(e).append(s)}),!0}generateCatalog(".catalog-body"),$(".catalog-toggle").click(function(e){e.preventDefault(),$(".side-catalog").toggleClass("fold")}),loadAsync("/js/jquery.nav.js",function(){$(".catalog-body").onePageNav({currentClass:"active",changeHash:!1,easing:"swing",filter:"",scrollSpeed:700,scrollOffset:0,scrollThreshold:.2,begin:null,end:null,scrollChange:null,padding:80})})</script></body></html>
