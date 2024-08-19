@@ -1,0 +1,281 @@
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta property="og:site_name" content="SleepingFace Blog"><meta property="og:type" content="article"><meta property="og:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta property="twitter:image" content="https://wangzhendong20.github.io//img/home1.jpg"><meta name=title content="刷题记录 - 2024/8/19"><meta property="og:title" content="刷题记录 - 2024/8/19"><meta property="twitter:title" content="刷题记录 - 2024/8/19"><meta name=description content="每日leetcode刷题记录"><meta property="og:description" content="每日leetcode刷题记录"><meta property="twitter:description" content="每日leetcode刷题记录"><meta property="twitter:card" content="summary"><meta name=keyword content="WangZhendong"><link rel="shortcut icon" href=/img/favicon.ico><title>刷题记录 - 2024/8/19 | 王振东的博客 | SleepingFace Blog</title>
+<link rel=canonical href=/2024/08/19/2024-08-19-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240819/><link rel=stylesheet href=/css/bootstrap.min.css><link rel=stylesheet href=/css/hugo-theme-cleanwhite.min.css><link rel=stylesheet href=/css/zanshang.css><link rel=stylesheet href=/css/font-awesome.all.min.css><script src=/js/jquery.min.js></script><script src=/js/bootstrap.min.js></script><script src=/js/hux-blog.min.js></script><script src=/js/lazysizes.min.js></script></head><nav class="navbar navbar-default navbar-custom navbar-fixed-top"><div class=container-fluid><div class="navbar-header page-scroll"><button type=button class=navbar-toggle>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+</button>
+<a class=navbar-brand href=/>SleepingFace Blog</a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/>All Posts</a></li><li><a href=/categories/java/>java</a></li><li><a href=/categories/leetcode/>leetcode</a></li><li><a href=/categories/llm/>llm</a></li><li><a href=/categories/other/>other</a></li><li><a href=/categories/tech/>tech</a></li><li><a href=/archive//>ARCHIVE</a></li><li><a href=/notes//>NOTES</a></li><li><a href=/about//>ABOUT</a></li><li><a href=/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/img/home1.jpg)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/java title=Java>Java
+</a><a class=tag href=/tags/leetcode title=LeetCode>LeetCode
+</a><a class=tag href=/tags/%E7%AE%97%E6%B3%95 title=算法>算法</a></div><h1>刷题记录 - 2024/8/19</h1><h2 class=subheading></h2><span class=meta>Posted by
+SleepingFace
+on
+Monday, August 19, 2024</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+post-container"><p><em>今天主要是图论的题目，学习了二分图，也把https://wangzhendong20.github.io/2024/07/23/leetcode-note/中的二分图补充上了。</em></p><h1 id=133-克隆图httpsleetcodecnproblemsclone-graph><a href=https://leetcode.cn/problems/clone-graph/>133. 克隆图</a></h1><p><em>算术评级：6</em> <strong>中等</strong></p><p>跟hot100里的<a href=https://leetcode.cn/problems/copy-list-with-random-pointer/>138. 随机链表的复制</a>很相似。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>middle133</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>Node</span> {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>int</span> val;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> List<span style=color:#ff79c6>&lt;</span>Node<span style=color:#ff79c6>&gt;</span> neighbors;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#50fa7b>Node</span>() {
+</span></span><span style=display:flex><span>            val <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>            neighbors <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;</span>Node<span style=color:#ff79c6>&gt;</span>();
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#50fa7b>Node</span>(<span style=color:#8be9fd>int</span> _val) {
+</span></span><span style=display:flex><span>            val <span style=color:#ff79c6>=</span> _val;
+</span></span><span style=display:flex><span>            neighbors <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;</span>Node<span style=color:#ff79c6>&gt;</span>();
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#50fa7b>Node</span>(<span style=color:#8be9fd>int</span> _val, ArrayList<span style=color:#ff79c6>&lt;</span>Node<span style=color:#ff79c6>&gt;</span> _neighbors) {
+</span></span><span style=display:flex><span>            val <span style=color:#ff79c6>=</span> _val;
+</span></span><span style=display:flex><span>            neighbors <span style=color:#ff79c6>=</span> _neighbors;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> Node <span style=color:#50fa7b>cloneGraph</span>(Node node) {
+</span></span><span style=display:flex><span>        HashMap<span style=color:#ff79c6>&lt;</span>Node, Node<span style=color:#ff79c6>&gt;</span> map <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> HashMap<span style=color:#ff79c6>&lt;</span>Node, Node<span style=color:#ff79c6>&gt;</span>();
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> dfs(node,map);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * DFS
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 需要用一个哈希表来存储已经建立好的节点
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param node
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param map
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> Node <span style=color:#50fa7b>dfs</span>(Node node, HashMap<span style=color:#ff79c6>&lt;</span>Node, Node<span style=color:#ff79c6>&gt;</span> map) {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (node <span style=color:#ff79c6>==</span> <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>null</span>;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (map.<span style=color:#50fa7b>containsKey</span>(node)) <span style=color:#ff79c6>return</span> map.<span style=color:#50fa7b>get</span>(node);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        Node newNode <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> Node(node.<span style=color:#50fa7b>val</span>, <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;</span>Node<span style=color:#ff79c6>&gt;</span>());
+</span></span><span style=display:flex><span>        map.<span style=color:#50fa7b>put</span>(node, newNode);
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (Node neighbor : node.<span style=color:#50fa7b>neighbors</span>) {
+</span></span><span style=display:flex><span>            newNode.<span style=color:#50fa7b>neighbors</span>.<span style=color:#50fa7b>add</span>(dfs(neighbor, map));
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> newNode;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h1 id=547-省份数量httpsleetcodecnproblemsnumber-of-provinces><a href=https://leetcode.cn/problems/number-of-provinces/>547. 省份数量</a></h1><p><em>算术评级：4</em> <strong>中等</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>middle547</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * DFS模板题
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param isConnected
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>int</span> <span style=color:#50fa7b>findCircleNum</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> isConnected) {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>boolean</span><span style=color:#ff79c6>[]</span> visited <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>boolean</span><span style=color:#ff79c6>[</span>isConnected.<span style=color:#50fa7b>length</span><span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> count <span style=color:#ff79c6>=</span> 0;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> isConnected.<span style=color:#50fa7b>length</span>; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (<span style=color:#ff79c6>!</span>visited<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>) {
+</span></span><span style=display:flex><span>                count<span style=color:#ff79c6>++</span>;
+</span></span><span style=display:flex><span>                dfs(isConnected, i, visited);
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> count;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>dfs</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> isConnected, <span style=color:#8be9fd>int</span> x, <span style=color:#8be9fd>boolean</span><span style=color:#ff79c6>[]</span> visited) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (visited<span style=color:#ff79c6>[</span>x<span style=color:#ff79c6>]</span>) <span style=color:#ff79c6>return</span>;
+</span></span><span style=display:flex><span>        visited<span style=color:#ff79c6>[</span>x<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>true</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> isConnected.<span style=color:#50fa7b>length</span>; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (x <span style=color:#ff79c6>==</span> i) <span style=color:#ff79c6>continue</span>;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (isConnected<span style=color:#ff79c6>[</span>x<span style=color:#ff79c6>][</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> 1 <span style=color:#ff79c6>&amp;&amp;</span> <span style=color:#ff79c6>!</span>visited<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>) {
+</span></span><span style=display:flex><span>                dfs(isConnected, i ,visited);
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h1 id=二分图>二分图</h1><p><em>此部分来源于https://leetcode.cn/problems/is-graph-bipartite/solutions/333138/bfs-dfs-bing-cha-ji-san-chong-fang-fa-pan-duan-er-/</em></p><h2 id=一什么是二分图>一、什么是二分图</h2><p>若无向图 G=(V,E) 的顶点集 V 可以分割为两个互不相交的子集，且图中每条边的两个顶点分别属于
+不同的子集，则称图 G 为一个二分图。</p><h2 id=二判断二分图>二、判断二分图</h2><h3 id=1深度优先搜索--广度优先搜索>1、深度优先搜索 / 广度优先搜索</h3><p>我们使用图搜索算法从各个连通域的任一顶点开始遍历整个连通域，遍历的过程中用两种不同的颜色对顶点进行染色，相邻顶点染成相反的颜色。这个过程中倘若发现相邻的顶点被染成了相同的颜色，说明它不是二分图；反之，如果所有的连通域都染色成功，说明它是二分图。</p><h3 id=2并查集>2、并查集</h3><p>我们知道如果是二分图的话，那么图中每个顶点的所有邻接点都应该属于同一集合，且不与顶点处于同一集合。因此我们可以使用并查集来解决这个问题，我们遍历图中每个顶点，将当前顶点的所有邻接点进行合并，并判断这些邻接点中是否存在某一邻接点已经和当前顶点处于同一个集合中了，若是，则说明不是二分图。</p><h3 id=二分图模板>二分图模板</h3><h1 id=785-判断二分图httpsleetcodecnproblemsis-graph-bipartite><a href=https://leetcode.cn/problems/is-graph-bipartite/>785. 判断二分图</a></h1><p><em>x</em></p><p><em>算术评级：5</em> <strong>中等</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>middle785</span> {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>class</span> <span style=color:#50fa7b>UF</span> {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> parent;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#50fa7b>UF</span>(<span style=color:#8be9fd>int</span> n) {
+</span></span><span style=display:flex><span>            parent <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> n; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>                parent<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> i;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>int</span> <span style=color:#50fa7b>find</span>(<span style=color:#8be9fd>int</span> x) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (x <span style=color:#ff79c6>==</span> parent<span style=color:#ff79c6>[</span>x<span style=color:#ff79c6>]</span>) <span style=color:#ff79c6>return</span> x;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>else</span> <span style=color:#ff79c6>return</span> parent<span style=color:#ff79c6>[</span>x<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> find(parent<span style=color:#ff79c6>[</span>x<span style=color:#ff79c6>]</span>);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>boolean</span> <span style=color:#50fa7b>isSame</span>(<span style=color:#8be9fd>int</span> x, <span style=color:#8be9fd>int</span> y) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span> find(x) <span style=color:#ff79c6>==</span> find(y);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>void</span> <span style=color:#50fa7b>join</span>(<span style=color:#8be9fd>int</span> x, <span style=color:#8be9fd>int</span> y) {
+</span></span><span style=display:flex><span>            x <span style=color:#ff79c6>=</span> find(x);
+</span></span><span style=display:flex><span>            y <span style=color:#ff79c6>=</span> find(y);
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (x <span style=color:#ff79c6>==</span> y) <span style=color:#ff79c6>return</span>;
+</span></span><span style=display:flex><span>            parent<span style=color:#ff79c6>[</span>y<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> x;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 并查集
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 我们知道如果是二分图的话，那么图中每个顶点的所有邻接点都应该属于同一集合，且不与顶点处于同一集合。
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 因此我们可以使用并查集来解决这个问题，
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 我们遍历图中每个顶点，将当前顶点的所有邻接点进行合并，并判断这些邻接点中是否存在某一邻接点已经和当前顶点处于同一个集合中了，
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 若是，则说明不是二分图。
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param graph
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>boolean</span> <span style=color:#50fa7b>isBipartite</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> graph) {
+</span></span><span style=display:flex><span>        UF uf <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> UF(graph.<span style=color:#50fa7b>length</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 遍历每个顶点，将当前顶点的所有邻接点进行合并</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> graph.<span style=color:#50fa7b>length</span>; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> adjs <span style=color:#ff79c6>=</span> graph<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> adj : adjs) {
+</span></span><span style=display:flex><span>                <span style=color:#6272a4>// 若某个邻接点与当前顶点已经在一个集合中了，说明不是二分图，返回 false。</span>
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (uf.<span style=color:#50fa7b>isSame</span>(i, adj)) {
+</span></span><span style=display:flex><span>                    <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>false</span>;
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>                uf.<span style=color:#50fa7b>join</span>(adjs<span style=color:#ff79c6>[</span>0<span style=color:#ff79c6>]</span>, adj);
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>true</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * DFS
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 我们使用图搜索算法从各个连通域的任一顶点开始遍历整个连通域，遍历的过程中用两种不同的颜色对顶点进行染色，相邻顶点染成相反的颜色。
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 这个过程中倘若发现相邻的顶点被染成了相同的颜色，说明它不是二分图；反之，如果所有的连通域都染色成功，说明它是二分图。
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param graph
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>boolean</span> <span style=color:#50fa7b>isBipartite2</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> graph) {
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 定义 visited 数组，初始值为 0 表示未被访问，赋值为 1 或者 -1 表示两种不同的颜色。</span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> visited <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>graph.<span style=color:#50fa7b>length</span><span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> graph.<span style=color:#50fa7b>length</span>; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (visited<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> 0 <span style=color:#ff79c6>&amp;&amp;</span> <span style=color:#ff79c6>!</span>dfs(graph, visited, i, 1)) {
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>false</span>;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>true</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#8be9fd>boolean</span> <span style=color:#50fa7b>dfs</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> graph, <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> visited, <span style=color:#8be9fd>int</span> u, <span style=color:#8be9fd>int</span> color) {
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 如果要对某顶点染色时，发现它已经被染色了，则判断它的颜色是否与本次要染的颜色相同，如果矛盾，说明此无向图无法被正确染色，返回 false。</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (visited<span style=color:#ff79c6>[</span>u<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>!=</span> 0) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span> visited<span style=color:#ff79c6>[</span>u<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> color;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 对当前顶点进行染色，并将当前顶点的所有邻接点染成相反的颜色。</span>
+</span></span><span style=display:flex><span>        visited<span style=color:#ff79c6>[</span>u<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> color;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> w : graph<span style=color:#ff79c6>[</span>u<span style=color:#ff79c6>]</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (<span style=color:#ff79c6>!</span>dfs(graph,visited,w,color)) {
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>false</span>;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>true</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * BFS
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param graph
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>boolean</span> <span style=color:#50fa7b>isBipartite3</span>(<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> graph) {
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 定义 visited 数组，初始值为 0 表示未被访问，赋值为 1 或者 -1 表示两种不同的颜色。</span>
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> visited <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>graph.<span style=color:#50fa7b>length</span><span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        Deque<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> queue <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> LinkedList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>        <span style=color:#6272a4>// 因为图中可能含有多个连通域，所以我们需要判断是否存在顶点未被访问，若存在则从它开始再进行一轮 bfs 染色。</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;</span> graph.<span style=color:#50fa7b>length</span>; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> (visited<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>!=</span> 0) {
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>continue</span>;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>            <span style=color:#6272a4>// 每出队一个顶点，将其所有邻接点染成相反的颜色并入队。</span>
+</span></span><span style=display:flex><span>            queue.<span style=color:#50fa7b>offer</span>(i);
+</span></span><span style=display:flex><span>            visited<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> 1;
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>while</span> (<span style=color:#ff79c6>!</span>queue.<span style=color:#50fa7b>isEmpty</span>()) {
+</span></span><span style=display:flex><span>                <span style=color:#8be9fd>int</span> v <span style=color:#ff79c6>=</span> queue.<span style=color:#50fa7b>poll</span>();
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> w : graph<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span>) {
+</span></span><span style=display:flex><span>                    <span style=color:#6272a4>// 如果当前顶点的某个邻接点已经被染过色了，且颜色和当前顶点相同，说明此无向图无法被正确染色，返回 false。</span>
+</span></span><span style=display:flex><span>                    <span style=color:#ff79c6>if</span> (visited<span style=color:#ff79c6>[</span>w<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> visited<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span>) {
+</span></span><span style=display:flex><span>                        <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>false</span>;
+</span></span><span style=display:flex><span>                    }
+</span></span><span style=display:flex><span>                    <span style=color:#ff79c6>if</span> (visited<span style=color:#ff79c6>[</span>w<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> 0) {
+</span></span><span style=display:flex><span>                        visited<span style=color:#ff79c6>[</span>w<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>-</span>visited<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>                        queue.<span style=color:#50fa7b>offer</span>(w);
+</span></span><span style=display:flex><span>                    }
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>true</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h1 id=886-可能的二分法httpsleetcodecnproblemspossible-bipartition><a href=https://leetcode.cn/problems/possible-bipartition/>886. 可能的二分法</a></h1><p><em>算术评级：5</em> <strong>中等</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#6272a4>/**
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * BFS
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * 这题实质也是判断是否构成二分图（以每个人为顶点，以“不喜欢”为边，即若 A 不喜欢 B，则在 A 与 B 之间建边）。
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param n
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @param dislikes
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     * @return
+</span></span></span><span style=display:flex><span><span style=color:#6272a4>     */</span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>boolean</span> <span style=color:#50fa7b>possibleBipartition</span>(<span style=color:#8be9fd>int</span> n, <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[][]</span> dislikes) {
+</span></span><span style=display:flex><span>    <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> visited <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> <span style=color:#8be9fd>int</span><span style=color:#ff79c6>[</span>n<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>    Deque<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;</span> deque <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> LinkedList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>    List<span style=color:#ff79c6>&lt;</span>Integer<span style=color:#ff79c6>&gt;[]</span> graph <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>[</span>n<span style=color:#ff79c6>+</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 0; i <span style=color:#ff79c6>&lt;=</span> n; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>        graph<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span>  <span style=color:#ff79c6>new</span> ArrayList<span style=color:#ff79c6>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span><span style=color:#ff79c6>[]</span> dislike : dislikes) {
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> u <span style=color:#ff79c6>=</span> dislike<span style=color:#ff79c6>[</span>0<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        <span style=color:#8be9fd>int</span> v <span style=color:#ff79c6>=</span> dislike<span style=color:#ff79c6>[</span>1<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>        graph<span style=color:#ff79c6>[</span>u<span style=color:#ff79c6>]</span>.<span style=color:#50fa7b>add</span>(v);
+</span></span><span style=display:flex><span>        graph<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span>.<span style=color:#50fa7b>add</span>(u);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> i <span style=color:#ff79c6>=</span> 1; i <span style=color:#ff79c6>&lt;</span> graph.<span style=color:#50fa7b>length</span>; i<span style=color:#ff79c6>++</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (visited<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>!=</span> 0) {
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>continue</span>;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        deque.<span style=color:#50fa7b>offer</span>(i);
+</span></span><span style=display:flex><span>        visited<span style=color:#ff79c6>[</span>i<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> 1;
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>while</span> (<span style=color:#ff79c6>!</span>deque.<span style=color:#50fa7b>isEmpty</span>()) {
+</span></span><span style=display:flex><span>            <span style=color:#8be9fd>int</span> v <span style=color:#ff79c6>=</span> deque.<span style=color:#50fa7b>poll</span>();
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>for</span> (<span style=color:#8be9fd>int</span> w : graph<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span>) {
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (visited<span style=color:#ff79c6>[</span>w<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> visited<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span>) {
+</span></span><span style=display:flex><span>                    <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>false</span>;
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (visited<span style=color:#ff79c6>[</span>w<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>==</span> 0) {
+</span></span><span style=display:flex><span>                    visited<span style=color:#ff79c6>[</span>w<span style=color:#ff79c6>]</span> <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>-</span>visited<span style=color:#ff79c6>[</span>v<span style=color:#ff79c6>]</span>;
+</span></span><span style=display:flex><span>                    deque.<span style=color:#50fa7b>offer</span>(w);
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> <span style=color:#ff79c6>true</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class="entry-shang text-center"><p>「给个赞赏，支持一下作者吧~」</p><button class="zs show-zs btn btn-bred">赞赏支持</button></div><div class=zs-modal-bg></div><div class=zs-modal-box><div class=zs-modal-head><button type=button class=close>×</button>
+<span class=author><a href=https://wangzhendong20.github.io/><img src=/img/favicon.png>SleepingFace Blog</a></span><p class=tip><i></i><span>给个赞赏，支持一下作者吧~</span></p></div><div class=zs-modal-body><div class=zs-modal-btns><button class="btn btn-blink" data-num=2>2元</button>
+<button class="btn btn-blink" data-num=5>5元</button>
+<button class="btn btn-blink" data-num=10>10元</button>
+<button class="btn btn-blink" data-num=50>50元</button>
+<button class="btn btn-blink" data-num=100>100元</button>
+<button class="btn btn-blink" data-num=1>任意金额</button></div><div class=zs-modal-pay><button class="btn btn-bred" id=pay-text>2元</button><p>使用<span id=pay-type>微信</span>扫描二维码完成支付</p><img src=/img/reward/wechat-2.png id=pay-image></div></div><div class=zs-modal-footer><label><input type=radio name=zs-type value=wechat class=zs-type checked><span><span class=zs-wechat><img src=/img/reward/wechat-btn.png></span></label>
+<label><input type=radio name=zs-type value=alipay class=zs-type class=zs-alipay><img src=/img/reward/alipay-btn.png></span></label></div></div><script type=text/javascript src=/js/reward.js></script><hr><ul class=pager><li class=previous><a href=/2024/08/18/2024-08-18-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240818/ data-toggle=tooltip data-placement=top title="刷题记录 - 2024/8/18">&larr;
+Previous Post</a></li></ul><script src=https://giscus.app/client.js data-repo=wangzhendong20/wangzhendong20.github.io data-repo-id=***************************** data-category=**************************** data-category-id=************************** data-mapping=pathname data-reactions-enabled=1 data-emit-metadata=0 data-theme=light data-lang=en crossorigin=anonymous async></script></div><div class="col-lg-2 col-lg-offset-0
+visible-lg-block
+sidebar-container
+catalog-container"><div class=side-catalog><hr class="hidden-sm hidden-xs"><h5><a class=catalog-toggle href=#>CATALOG</a></h5><ul class=catalog-body></ul></div></div><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+sidebar-container"><section><hr class="hidden-sm hidden-xs"><h5><a href=/tags/>FEATURED TAGS</a></h5><div class=tags><a href=/tags/java title=java>java
+</a><a href=/tags/leetcode title=leetcode>leetcode
+</a><a href=/tags/%E7%AE%97%E6%B3%95 title=算法>算法
+</a><a href=/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F title=设计模式>设计模式</a></div></section><section><hr><h5>FRIENDS</h5><ul class=list-inline><li><a target=_blank href=https://tanxiangyuu.github.io>谭总的博客</a></li></ul></section></div></div></div></article><footer><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><ul class="list-inline text-center"><li><a href=mailto:wangzhendong20@163.com><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-envelope fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://github.com/wangzhendong20><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-github fa-stack-1x fa-inverse"></i></span></a></li><li><a href rel=alternate type=application/rss+xml title="SleepingFace Blog"><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-rss fa-stack-1x fa-inverse"></i></span></a></li></ul><p class="copyright text-muted">&copy; SleepingFace Blog 2024<br><a>欢迎评论哦！</a></p></div></div></div></footer><script>function loadAsync(e,t){var s=document,o="script",n=s.createElement(o),i=s.getElementsByTagName(o)[0];n.src=e,t&&n.addEventListener("load",function(e){t(null,e)},!1),i.parentNode.insertBefore(n,i)}</script><script>$("#tag_cloud").length!==0&&loadAsync("/js/jquery.tagcloud.js",function(){$.fn.tagcloud.defaults={color:{start:"#bbbbee",end:"#0085a1"}},$("#tag_cloud a").tagcloud()})</script><script>loadAsync("https://cdn.jsdelivr.net/npm/fastclick@1.0.6/lib/fastclick.min.js",function(){var e=document.querySelector("nav");e&&FastClick.attach(e)})</script><script>(function(){var t,e=document.createElement("script"),n=window.location.protocol.split(":")[0];n==="https"?e.src="https://zz.bdstatic.com/linksubmit/push.js":e.src="http://push.zhanzhang.baidu.com/push.js",t=document.getElementsByTagName("script")[0],t.parentNode.insertBefore(e,t)})()</script><script>var _baId="8cc115b1ee28b68ce1138a4281875e00",_hmt=_hmt||[];(function(){var e,t=document.createElement("script");t.src="//hm.baidu.com/hm.js?"+_baId,e=document.getElementsByTagName("script")[0],e.parentNode.insertBefore(t,e)})()</script><script type=text/javascript>function generateCatalog(e){_containerSelector="div.post-container";var t,n,s,o,i,a=$(_containerSelector),r=a.find("h1,h2,h3,h4,h5,h6");return $(e).html(""),r.each(function(){t=$(this).prop("tagName").toLowerCase(),o="#"+$(this).prop("id"),n=$(this).text(),i=$('<a href="'+o+'" rel="nofollow">'+n+"</a>"),s=$('<li class="'+t+'_nav"></li>').append(i),$(e).append(s)}),!0}generateCatalog(".catalog-body"),$(".catalog-toggle").click(function(e){e.preventDefault(),$(".side-catalog").toggleClass("fold")}),loadAsync("/js/jquery.nav.js",function(){$(".catalog-body").onePageNav({currentClass:"active",changeHash:!1,easing:"swing",filter:"",scrollSpeed:700,scrollOffset:0,scrollThreshold:.2,begin:null,end:null,scrollChange:null,padding:80})})</script></body></html>
