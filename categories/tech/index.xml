@@ -4,7 +4,11 @@
 &lt;h1 id="linux常用命令">Linux常用命令&lt;/h1>
 &lt;h2 id="1-ls">1. &lt;code>ls&lt;/code>&lt;/h2>
 &lt;p>&lt;strong>用途：&lt;/strong> 列出目录内容
-&lt;strong>使用场景：&lt;/strong> 查看当前目录下的文件和文件夹。&lt;/p></description></item><item><title>Go学习笔记</title><link>https://wangzhendong20.github.io/2024/08/07/2024-8-7-Go%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link><pubDate>Wed, 07 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/07/2024-8-7-Go%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</guid><description>&lt;h1 id="go学习笔记">Go学习笔记&lt;/h1>
+&lt;strong>使用场景：&lt;/strong> 查看当前目录下的文件和文件夹。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>ls
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-cd">2. &lt;code>cd&lt;/code>&lt;/h2>
+&lt;p>&lt;strong>用途：&lt;/strong> 切换目录
+&lt;strong>使用场景：&lt;/strong> 导航到不同的目录。&lt;/p></description></item><item><title>Go学习笔记</title><link>https://wangzhendong20.github.io/2024/08/07/2024-8-7-Go%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link><pubDate>Wed, 07 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/07/2024-8-7-Go%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</guid><description>&lt;h1 id="go学习笔记">Go学习笔记&lt;/h1>
 &lt;p>&lt;em>翻到了去年学习go时候的笔记，记录一下哈哈哈。&lt;/em>&lt;/p>
 &lt;p>**hello world! **&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ff79c6">package&lt;/span> main
@@ -14,5 +18,20 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd;font-style:italic">func&lt;/span> &lt;span style="color:#50fa7b">main&lt;/span>() {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fm.&lt;span style="color:#50fa7b">Println&lt;/span>(&lt;span style="color:#f1fa8c">&amp;#34;hello, world&amp;#34;&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pr</description></item><item><title>Git常用命令</title><link>https://wangzhendong20.github.io/2024/07/29/2024-7-29-Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</link><pubDate>Mon, 29 Jul 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/07/29/2024-7-29-Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</guid><description>&lt;h1 id="git常用命令">Git常用命令&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="基本结构和要素">基本结构和要素&lt;/h1>
+&lt;p>&lt;strong>导入多个包时：&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ff79c6">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f1fa8c">&amp;#34;fmt&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f1fa8c">&amp;#34;os&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>函数：&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd;font-style:italic">func&lt;/span> &lt;span style="color:#50fa7b">functionName&lt;/span>(parameter_list) (return_value_list) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> …
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中：&lt;/p>
+&lt;ul>
+&lt;li>parameter_list 的形式为 (param1 type1, param2 type2, …)&lt;/li>
+&lt;li>return_value_list 的形式为 (ret1 type1, ret2 type2, …)&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>类型&lt;/strong>：&lt;/p></description></item><item><title>Git常用命令</title><link>https://wangzhendong20.github.io/2024/07/29/2024-7-29-Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</link><pubDate>Mon, 29 Jul 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/07/29/2024-7-29-Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</guid><description>&lt;h1 id="git常用命令">Git常用命令&lt;/h1>
 &lt;p>&lt;strong>前言：&lt;/strong> 总是使用idea或者VsCode当中的Git直接操作，但是有时候需要用到git命令的时候往往忘记了就需要现查，于是乎就做了一个小总结，方便日常使用。&lt;/p></description></item></channel></rss>

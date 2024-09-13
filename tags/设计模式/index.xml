@@ -7,4 +7,7 @@
 &lt;p>装饰者模式是一种结构型设计模式，它允许你通过将对象放入包含行为的特殊封装对象中来为原对象增加新的行为。这些封装对象被称为装饰者。&lt;/p></description></item><item><title>设计模式之责任链模式</title><link>https://wangzhendong20.github.io/2024/08/17/2024-08-17-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F/</link><pubDate>Sat, 17 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/17/2024-08-17-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F/</guid><description>&lt;h1 id="责任链模式chain-of-responsibility-pattern">责任链模式（Chain of Responsibility Pattern）&lt;/h1>
 &lt;h2 id="概述">概述：&lt;/h2>
 &lt;p>责任链模式是一种行为型设计模式，它允许多个对象有机会处理请求，将这些对象连成一条链，直到有对象处理它为止。请求在链上传递，直到链上的某个对象处理该请求。&lt;/p></description></item><item><title>策略模式+工厂模式实现多种文件类型上传处理</title><link>https://wangzhendong20.github.io/2024/07/31/2024-7-31-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/</link><pubDate>Wed, 31 Jul 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/07/31/2024-7-31-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/</guid><description>&lt;h1 id="策略模式工厂模式实现多种文件类型上传处理">策略模式+工厂模式实现多种文件类型上传处理&lt;/h1>
-&lt;p>&lt;strong>前言：&lt;/strong> 记录在&lt;em>SleepingFace BI&lt;/em>项目里的一个小优化，采用&lt;em>策略模式+工厂模式&lt;/em>代替了&lt;em>if-else&lt;/em>实现多种文件类型的上传处理。&lt;/p></description></item></channel></rss>
+&lt;p>&lt;strong>前言：&lt;/strong> 记录在&lt;em>SleepingFace BI&lt;/em>项目里的一个小优化，采用&lt;em>策略模式+工厂模式&lt;/em>代替了&lt;em>if-else&lt;/em>实现多种文件类型的上传处理。&lt;/p>
+&lt;h1 id="1-策略模式">1. 策略模式&lt;/h1>
+&lt;h2 id="11-简介">1.1 简介&lt;/h2>
+&lt;p>策略模式定义了一系列算法，并将每个算法封装起来，使得它们可以互换。策略模式使得算法的变化独立于使用它们的客户端。&lt;/p></description></item></channel></rss>

@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>AOP on SleepingFace Blog</title><link>https://wangzhendong20.github.io/tags/aop/</link><description>Recent content in AOP on SleepingFace Blog</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Thu, 01 Aug 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://wangzhendong20.github.io/tags/aop/index.xml" rel="self" type="application/rss+xml"/><item><title>利用AOP实现权限校验和请求响应日志输出</title><link>https://wangzhendong20.github.io/2024/08/01/2024-8-1-AOP/</link><pubDate>Thu, 01 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/01/2024-8-1-AOP/</guid><description>&lt;h1 id="利用aop实现权限校验和请求响应日志输出">利用AOP实现权限校验和请求响应日志输出&lt;/h1>
-&lt;p>&lt;strong>前言：&lt;/strong> 记录一下在&lt;em>SleepingFace BI&lt;/em>项目里利用AOP做了什么？&lt;/p></description></item></channel></rss>
+&lt;p>&lt;strong>前言：&lt;/strong> 记录一下在&lt;em>SleepingFace BI&lt;/em>项目里利用AOP做了什么？&lt;/p>
+&lt;ul>
+&lt;li>权限校验&lt;/li>
+&lt;li>请求响应日志输出&lt;/li>
+&lt;/ul>
+&lt;h1 id="1-aop相关知识">1. AOP相关知识&lt;/h1>
+&lt;h2 id="11-aop简介">1.1 AOP简介&lt;/h2>
+&lt;p>AOP(Aspect-Oriented Programming:面向切面编程)能够将那些&lt;strong>与业务无关&lt;/strong>，却为业务模块所&lt;strong>共同调用&lt;/strong>的逻辑或责任（例如事务处理、日志管理、权限控制等）封装起来，便于减少系统的重复代码，降低模块间的耦合度，并有利于未来的可拓展性和可维护性。&lt;/p></description></item></channel></rss>

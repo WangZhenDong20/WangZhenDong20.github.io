@@ -1,3 +1,56 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Spring Cache on SleepingFace Blog</title><link>https://wangzhendong20.github.io/tags/spring-cache/</link><description>Recent content in Spring Cache on SleepingFace Blog</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Mon, 19 Aug 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://wangzhendong20.github.io/tags/spring-cache/index.xml" rel="self" type="application/rss+xml"/><item><title>基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存</title><link>https://wangzhendong20.github.io/2024/08/19/2024-08-19-%E5%9F%BA%E4%BA%8ESpringCache%E6%B3%A8%E8%A7%A3%E5%92%8CRedis%E5%AE%9E%E7%8E%B0%E5%AF%B9%E6%95%B0%E6%8D%AE%E5%AD%97%E5%85%B8%E7%9A%84%E8%87%AA%E5%8A%A8%E7%BC%93%E5%AD%98/</link><pubDate>Mon, 19 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/19/2024-08-19-%E5%9F%BA%E4%BA%8ESpringCache%E6%B3%A8%E8%A7%A3%E5%92%8CRedis%E5%AE%9E%E7%8E%B0%E5%AF%B9%E6%95%B0%E6%8D%AE%E5%AD%97%E5%85%B8%E7%9A%84%E8%87%AA%E5%8A%A8%E7%BC%93%E5%AD%98/</guid><description>&lt;h1 id="基于-spring-cache-注解--redis-实现对数据字典的自动缓存">基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存&lt;/h1>
 &lt;hr>
-&lt;p>&lt;em>前言：&lt;/em> 基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存，并通过自定义 Redis Key Generator 来根据类和方法自动生成 key。&lt;/p></description></item></channel></rss>
+&lt;p>&lt;em>前言：&lt;/em> 基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存，并通过自定义 Redis Key Generator 来根据类和方法自动生成 key。&lt;/p>
+&lt;hr>
+&lt;h2 id="1-实体类">1. 实体类&lt;/h2>
+&lt;h3 id="dict">Dict&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>@Data
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@ApiModel(description &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;数据字典&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@TableName(&lt;span style="color:#f1fa8c">&amp;#34;dict&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd;font-style:italic">public&lt;/span> &lt;span style="color:#8be9fd;font-style:italic">class&lt;/span> &lt;span style="color:#50fa7b">Dict&lt;/span> { &lt;span style="color:#6272a4">//不继承baseEntity&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> &lt;span style="color:#8be9fd;font-style:italic">static&lt;/span> &lt;span style="color:#8be9fd;font-style:italic">final&lt;/span> &lt;span style="color:#8be9fd">long&lt;/span> serialVersionUID &lt;span style="color:#ff79c6">=&lt;/span> 1L;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;id&amp;#34;&lt;/span>) &lt;span style="color:#6272a4">//去掉了自动增长&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> Long id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;创建时间&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @JsonFormat(pattern &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;yyyy-MM-dd HH:mm:ss&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;create_time&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> Date createTime;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;更新时间&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;update_time&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> Date updateTime;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;逻辑删除(1:已删除，0:未删除)&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableLogic
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;is_deleted&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> Integer isDeleted;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;其他参数&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(exist &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">false&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> Map&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>String,Object&lt;span style="color:#ff79c6">&amp;gt;&lt;/span> param &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">new&lt;/span> HashMap&lt;span style="color:#ff79c6">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;上级id&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;parent_id&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> Long parentId;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;名称&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;name&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> String name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;值&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;value&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> String value;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;编码&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;dict_code&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> String dictCode;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;是否包含子节点&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(exist &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">false&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> &lt;span style="color:#8be9fd">boolean&lt;/span> hasChildren;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>上级id，通过id与parent_id构建上下级关系&lt;/strong>&lt;/p></description></item></channel></rss>

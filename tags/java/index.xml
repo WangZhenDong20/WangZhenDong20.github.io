@@ -8,35 +8,355 @@
 &lt;h2 id="概述">概述：&lt;/h2>
 &lt;p>观察者模式（Observer Pattern）是一种行为设计模式，它定义了一种一对多的依赖关系，使得一个对象状态的改变可以通知到所有依赖它的对象，并且自动更新。这种模式特别适用于需要通知多个对象状态变化的场景，常用于实现事件驱动的系统。&lt;/p></description></item><item><title>leetcode打卡 - 2024/8/19</title><link>https://wangzhendong20.github.io/2024/08/19/2024-08-19-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240819/</link><pubDate>Mon, 19 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/19/2024-08-19-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240819/</guid><description>&lt;p>&lt;em>今天主要是图论的题目，学习了二分图，也把https://wangzhendong20.github.io/2024/07/23/leetcode-note/中的二分图补充上了。&lt;/em>&lt;/p></description></item><item><title>基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存</title><link>https://wangzhendong20.github.io/2024/08/19/2024-08-19-%E5%9F%BA%E4%BA%8ESpringCache%E6%B3%A8%E8%A7%A3%E5%92%8CRedis%E5%AE%9E%E7%8E%B0%E5%AF%B9%E6%95%B0%E6%8D%AE%E5%AD%97%E5%85%B8%E7%9A%84%E8%87%AA%E5%8A%A8%E7%BC%93%E5%AD%98/</link><pubDate>Mon, 19 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/19/2024-08-19-%E5%9F%BA%E4%BA%8ESpringCache%E6%B3%A8%E8%A7%A3%E5%92%8CRedis%E5%AE%9E%E7%8E%B0%E5%AF%B9%E6%95%B0%E6%8D%AE%E5%AD%97%E5%85%B8%E7%9A%84%E8%87%AA%E5%8A%A8%E7%BC%93%E5%AD%98/</guid><description>&lt;h1 id="基于-spring-cache-注解--redis-实现对数据字典的自动缓存">基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存&lt;/h1>
 &lt;hr>
-&lt;p>&lt;em>前言：&lt;/em> 基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存，并通过自定义 Redis Key Generator 来根据类和方法自动生成 key。&lt;/p></description></item><item><title>leetcode打卡 - 2024/8/18</title><link>https://wangzhendong20.github.io/2024/08/18/2024-08-18-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240818/</link><pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/18/2024-08-18-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240818/</guid><description>&lt;p>&lt;em>前言：今天做了两道相似的题目，都是跟字典序相关的，但是都不会呜呜呜。&lt;/em>&lt;/p>
+&lt;p>&lt;em>前言：&lt;/em> 基于 Spring Cache 注解 + Redis 实现对数据字典的自动缓存，并通过自定义 Redis Key Generator 来根据类和方法自动生成 key。&lt;/p>
+&lt;hr>
+&lt;h2 id="1-实体类">1. 实体类&lt;/h2>
+&lt;h3 id="dict">Dict&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>@Data
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@ApiModel(description &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;数据字典&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>@TableName(&lt;span style="color:#f1fa8c">&amp;#34;dict&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd;font-style:italic">public&lt;/span> &lt;span style="color:#8be9fd;font-style:italic">class&lt;/span> &lt;span style="color:#50fa7b">Dict&lt;/span> { &lt;span style="color:#6272a4">//不继承baseEntity&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> &lt;span style="color:#8be9fd;font-style:italic">static&lt;/span> &lt;span style="color:#8be9fd;font-style:italic">final&lt;/span> &lt;span style="color:#8be9fd">long&lt;/span> serialVersionUID &lt;span style="color:#ff79c6">=&lt;/span> 1L;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;id&amp;#34;&lt;/span>) &lt;span style="color:#6272a4">//去掉了自动增长&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> Long id;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;创建时间&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @JsonFormat(pattern &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;yyyy-MM-dd HH:mm:ss&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;create_time&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> Date createTime;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;更新时间&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;update_time&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> Date updateTime;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;逻辑删除(1:已删除，0:未删除)&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableLogic
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;is_deleted&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> Integer isDeleted;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;其他参数&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(exist &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">false&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> Map&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>String,Object&lt;span style="color:#ff79c6">&amp;gt;&lt;/span> param &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">new&lt;/span> HashMap&lt;span style="color:#ff79c6">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;上级id&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;parent_id&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> Long parentId;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;名称&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;name&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> String name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;值&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;value&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> String value;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;编码&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(&lt;span style="color:#f1fa8c">&amp;#34;dict_code&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> String dictCode;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @ApiModelProperty(value &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#f1fa8c">&amp;#34;是否包含子节点&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> @TableField(exist &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">false&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> &lt;span style="color:#8be9fd">boolean&lt;/span> hasChildren;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;strong>上级id，通过id与parent_id构建上下级关系&lt;/strong>&lt;/p></description></item><item><title>leetcode打卡 - 2024/8/18</title><link>https://wangzhendong20.github.io/2024/08/18/2024-08-18-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240818/</link><pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/18/2024-08-18-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240818/</guid><description>&lt;p>&lt;em>前言：今天做了两道相似的题目，都是跟字典序相关的，但是都不会呜呜呜。&lt;/em>&lt;/p>
 &lt;h1 id="440-字典序的第k小数字httpsleetcodecnproblemsk-th-smallest-in-lexicographical-order">&lt;a href="https://leetcode.cn/problems/k-th-smallest-in-lexicographical-order/">440. 字典序的第K小数字&lt;/a>&lt;/h1>
+&lt;p>&lt;em>x&lt;/em>&lt;/p>
+&lt;p>&lt;em>算术评级：8&lt;/em> &lt;strong>困难&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * BFS+DFS
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 考虑前缀树。
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 字典序会给我们这样一个顺序，
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 1作为根节点（前缀），子节点为10 - 19（以1为前缀）;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 10作为根节点，子节点为100 - 109（以10为前缀）;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 以此类推
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 我们需要找k属于哪个根节点下的哪个子节点。
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 假如1为根节点的全部的节点数都不够，那么bfs到2为根节点继续找
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param n
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param k
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @return
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd;font-style:italic">public&lt;/span> &lt;span style="color:#8be9fd">int&lt;/span> &lt;span style="color:#50fa7b">findKthNumber&lt;/span>(&lt;span style="color:#8be9fd">int&lt;/span> n, &lt;span style="color:#8be9fd">int&lt;/span> k) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">long&lt;/span> point &lt;span style="color:#ff79c6">=&lt;/span> 1; &lt;span style="color:#6272a4">// 当前指针&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">long&lt;/span> curN &lt;span style="color:#ff79c6">=&lt;/span> 1; &lt;span style="color:#6272a4">// 当前前缀&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">while&lt;/span> (point &lt;span style="color:#ff79c6">&amp;lt;&lt;/span> k) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">long&lt;/span> count &lt;span style="color:#ff79c6">=&lt;/span> dfs(curN, curN, n);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#6272a4">//当前要求数字是否在当前前缀下&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">if&lt;/span> (point &lt;span style="color:#ff79c6">+&lt;/span> count &lt;span style="color:#ff79c6">&amp;gt;&lt;/span> k) {&lt;span style="color:#6272a4">//在当前前缀下&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> curN &lt;span style="color:#ff79c6">*=&lt;/span> 10;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#6272a4">//修改指针,把指针指向该节点下第一个子节点的位置&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#6272a4">//当前节点的子节点中，取走当前根节点，dfs向下 (比如 1 -&amp;gt; 10)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> point&lt;span style="color:#ff79c6">++&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#ff79c6">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> curN&lt;span style="color:#ff79c6">++&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#6272a4">//修改指针,把指针指向同层下一前缀的起点&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#6272a4">//当前节点中总数都小于需要的数，可以全部取走，bfs到同层下一点 (比如 1 -&amp;gt; 2)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> point &lt;span style="color:#ff79c6">+=&lt;/span> count;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">return&lt;/span> (&lt;span style="color:#8be9fd">int&lt;/span>) curN;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 确定指定前缀下的所有子节点数(包括当前节点)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 第一轮 curN = 1, nextN = 1 count计算的就是 1 - 1之间的个数
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 第二轮 curN = 10, nextN = 19 count计算的就是 10 - 19之间的个数
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 第二轮 curN = 100, nextN = 190 count计算的就是 100 - 199之间的个数
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 依次类推...
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 递归之后返回的就是节点前缀为1的子节点数
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param curN
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param nextN
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param n
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @return
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd;font-style:italic">private&lt;/span> &lt;span style="color:#8be9fd">long&lt;/span> &lt;span style="color:#50fa7b">dfs&lt;/span>(&lt;span style="color:#8be9fd">long&lt;/span> curN, &lt;span style="color:#8be9fd">long&lt;/span> nextN, &lt;span style="color:#8be9fd">int&lt;/span> n) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">if&lt;/span> (curN &lt;span style="color:#ff79c6">&amp;gt;&lt;/span> n) &lt;span style="color:#ff79c6">return&lt;/span> 0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">long&lt;/span> count &lt;span style="color:#ff79c6">=&lt;/span> Math.&lt;span style="color:#50fa7b">min&lt;/span>(nextN, n) &lt;span style="color:#ff79c6">-&lt;/span> curN &lt;span style="color:#ff79c6">+&lt;/span> 1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">return&lt;/span> count &lt;span style="color:#ff79c6">+&lt;/span> dfs(curN &lt;span style="color:#ff79c6">*&lt;/span> 10, nextN &lt;span style="color:#ff79c6">*&lt;/span> 10 &lt;span style="color:#ff79c6">+&lt;/span> 9, n);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="386-字典序排数httpsleetcodecnproblemslexicographical-numbers">&lt;a href="https://leetcode.cn/problems/lexicographical-numbers/">386. 字典序排数&lt;/a>&lt;/h1>
 &lt;p>&lt;em>x&lt;/em>&lt;/p></description></item><item><title>设计模式之适配器模式</title><link>https://wangzhendong20.github.io/2024/08/18/2024-08-18-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/</link><pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/18/2024-08-18-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/</guid><description>&lt;h1 id="适配器模式adapter-pattern">适配器模式（Adapter Pattern）&lt;/h1>
 &lt;h2 id="概述">概述：&lt;/h2>
 &lt;p>适配器模式是一种结构型设计模式，它允许你将一个类的接口转换成客户端所期待的另一个接口，使得原本由于接口不兼容而不能一起工作的类可以一起工作。&lt;/p></description></item><item><title>leetcode打卡 - 2024/8/17</title><link>https://wangzhendong20.github.io/2024/08/17/2024-08-17-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240817/</link><pubDate>Sat, 17 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/17/2024-08-17-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240817/</guid><description>&lt;h1 id="658-找到-k-个最接近的元素httpsleetcodecnproblemsfind-k-closest-elements">&lt;a href="https://leetcode.cn/problems/find-k-closest-elements/">658. 找到 K 个最接近的元素&lt;/a>&lt;/h1>
-&lt;p>&lt;em>算术评级：4&lt;/em> &lt;strong>中等&lt;/strong>&lt;/p></description></item><item><title>设计模式之装饰者模式</title><link>https://wangzhendong20.github.io/2024/08/17/2024-08-17-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E8%A3%85%E9%A5%B0%E8%80%85%E6%A8%A1%E5%BC%8F/</link><pubDate>Sat, 17 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/17/2024-08-17-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E8%A3%85%E9%A5%B0%E8%80%85%E6%A8%A1%E5%BC%8F/</guid><description>&lt;h1 id="装饰者模式decorator-pattern">装饰者模式（Decorator Pattern）&lt;/h1>
+&lt;p>&lt;em>算术评级：4&lt;/em> &lt;strong>中等&lt;/strong>&lt;/p>
+&lt;h2 id="堆">堆&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * heap
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param arr
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param k
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param x
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @return
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd;font-style:italic">public&lt;/span> List&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Integer&lt;span style="color:#ff79c6">&amp;gt;&lt;/span> &lt;span style="color:#50fa7b">findClosestElements&lt;/span>(&lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[]&lt;/span> arr, &lt;span style="color:#8be9fd">int&lt;/span> k, &lt;span style="color:#8be9fd">int&lt;/span> x) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> PriorityQueue&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>&lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[]&amp;gt;&lt;/span> pq &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">new&lt;/span> PriorityQueue&lt;span style="color:#ff79c6">&amp;lt;&amp;gt;&lt;/span>(k,(a,b) &lt;span style="color:#ff79c6">-&amp;gt;&lt;/span> b&lt;span style="color:#ff79c6">[&lt;/span>1&lt;span style="color:#ff79c6">]-&lt;/span>a&lt;span style="color:#ff79c6">[&lt;/span>1&lt;span style="color:#ff79c6">]&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">for&lt;/span> (&lt;span style="color:#8be9fd">int&lt;/span> i &lt;span style="color:#ff79c6">=&lt;/span> 0; i &lt;span style="color:#ff79c6">&amp;lt;&lt;/span> arr.&lt;span style="color:#50fa7b">length&lt;/span>; i&lt;span style="color:#ff79c6">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">if&lt;/span> (pq.&lt;span style="color:#50fa7b">size&lt;/span>() &lt;span style="color:#ff79c6">&amp;gt;=&lt;/span> k) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">if&lt;/span> (Math.&lt;span style="color:#50fa7b">abs&lt;/span>(arr&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">-&lt;/span> x) &lt;span style="color:#ff79c6">&amp;lt;&lt;/span> Math.&lt;span style="color:#50fa7b">abs&lt;/span>(pq.&lt;span style="color:#50fa7b">peek&lt;/span>()&lt;span style="color:#ff79c6">[&lt;/span>1&lt;span style="color:#ff79c6">]&lt;/span>)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pq.&lt;span style="color:#50fa7b">poll&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pq.&lt;span style="color:#50fa7b">offer&lt;/span>(&lt;span style="color:#ff79c6">new&lt;/span> &lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[]&lt;/span>{arr&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">]&lt;/span>, Math.&lt;span style="color:#50fa7b">abs&lt;/span>(arr&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">-&lt;/span> x)});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#ff79c6">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pq.&lt;span style="color:#50fa7b">offer&lt;/span>(&lt;span style="color:#ff79c6">new&lt;/span> &lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[]&lt;/span>{arr&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">]&lt;/span>, Math.&lt;span style="color:#50fa7b">abs&lt;/span>(arr&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">-&lt;/span> x)});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Integer&lt;span style="color:#ff79c6">&amp;gt;&lt;/span> res &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">new&lt;/span> ArrayList&lt;span style="color:#ff79c6">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">while&lt;/span> (&lt;span style="color:#ff79c6">!&lt;/span>pq.&lt;span style="color:#50fa7b">isEmpty&lt;/span>()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> res.&lt;span style="color:#50fa7b">add&lt;/span>(pq.&lt;span style="color:#50fa7b">poll&lt;/span>()&lt;span style="color:#ff79c6">[&lt;/span>0&lt;span style="color:#ff79c6">]&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Collections.&lt;span style="color:#50fa7b">sort&lt;/span>(res);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">return&lt;/span> res;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="双指针删除元素">双指针删除元素&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 双指针删除元素
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param arr
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param k
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param x
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @return
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd;font-style:italic">public&lt;/span> List&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Integer&lt;span style="color:#ff79c6">&amp;gt;&lt;/span> &lt;span style="color:#50fa7b">findClosestElements2&lt;/span>(&lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[]&lt;/span> arr, &lt;span style="color:#8be9fd">int&lt;/span> k, &lt;span style="color:#8be9fd">int&lt;/span> x) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">int&lt;/span> left &lt;span style="color:#ff79c6">=&lt;/span> 0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">int&lt;/span> right &lt;span style="color:#ff79c6">=&lt;/span> arr.&lt;span style="color:#50fa7b">length&lt;/span> &lt;span style="color:#ff79c6">-&lt;/span> 1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Integer&lt;span style="color:#ff79c6">&amp;gt;&lt;/span> res &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">new&lt;/span> ArrayList&lt;span style="color:#ff79c6">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">int&lt;/span> removeNum &lt;span style="color:#ff79c6">=&lt;/span> arr.&lt;span style="color:#50fa7b">length&lt;/span> &lt;span style="color:#ff79c6">-&lt;/span> k;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">while&lt;/span> (removeNum&lt;span style="color:#ff79c6">--&lt;/span> &lt;span style="color:#ff79c6">&amp;gt;&lt;/span> 0) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">if&lt;/span> (Math.&lt;span style="color:#50fa7b">abs&lt;/span>(arr&lt;span style="color:#ff79c6">[&lt;/span>left&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">-&lt;/span> x) &lt;span style="color:#ff79c6">&amp;lt;=&lt;/span> Math.&lt;span style="color:#50fa7b">abs&lt;/span>(arr&lt;span style="color:#ff79c6">[&lt;/span>right&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">-&lt;/span> x)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> right&lt;span style="color:#ff79c6">--&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#ff79c6">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> left&lt;span style="color:#ff79c6">++&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">for&lt;/span> (&lt;span style="color:#8be9fd">int&lt;/span> i &lt;span style="color:#ff79c6">=&lt;/span> left; i &lt;span style="color:#ff79c6">&amp;lt;=&lt;/span> right; i&lt;span style="color:#ff79c6">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> res.&lt;span style="color:#50fa7b">add&lt;/span>(arr&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">]&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">return&lt;/span> res;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="二分查找边界">二分查找边界&lt;/h2>
+&lt;p>&lt;em>题解来源于https://leetcode.cn/problems/find-k-closest-elements/solutions/12476/pai-chu-fa-shuang-zhi-zhen-er-fen-fa-python-dai-ma/&lt;/em>&lt;/p></description></item><item><title>设计模式之装饰者模式</title><link>https://wangzhendong20.github.io/2024/08/17/2024-08-17-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E8%A3%85%E9%A5%B0%E8%80%85%E6%A8%A1%E5%BC%8F/</link><pubDate>Sat, 17 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/17/2024-08-17-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E8%A3%85%E9%A5%B0%E8%80%85%E6%A8%A1%E5%BC%8F/</guid><description>&lt;h1 id="装饰者模式decorator-pattern">装饰者模式（Decorator Pattern）&lt;/h1>
 &lt;h2 id="概述">概述：&lt;/h2>
 &lt;p>装饰者模式是一种结构型设计模式，它允许你通过将对象放入包含行为的特殊封装对象中来为原对象增加新的行为。这些封装对象被称为装饰者。&lt;/p></description></item><item><title>设计模式之责任链模式</title><link>https://wangzhendong20.github.io/2024/08/17/2024-08-17-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F/</link><pubDate>Sat, 17 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/17/2024-08-17-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F/</guid><description>&lt;h1 id="责任链模式chain-of-responsibility-pattern">责任链模式（Chain of Responsibility Pattern）&lt;/h1>
 &lt;h2 id="概述">概述：&lt;/h2>
 &lt;p>责任链模式是一种行为型设计模式，它允许多个对象有机会处理请求，将这些对象连成一条链，直到有对象处理它为止。请求在链上传递，直到链上的某个对象处理该请求。&lt;/p></description></item><item><title>leetcode打卡 - 2024/8/15</title><link>https://wangzhendong20.github.io/2024/08/15/2024-08-15-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240815/</link><pubDate>Thu, 15 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/15/2024-08-15-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240815/</guid><description>&lt;h1 id="264-丑数-iihttpsleetcodecnproblemsugly-number-ii">&lt;a href="https://leetcode.cn/problems/ugly-number-ii/">264. 丑数 II&lt;/a>&lt;/h1>
 &lt;p>&lt;em>×&lt;/em>&lt;/p>
-&lt;p>&lt;em>算数评级：5&lt;/em> &lt;strong>中等&lt;/strong>&lt;/p></description></item><item><title>leetcode打卡 - 2024/8/14</title><link>https://wangzhendong20.github.io/2024/08/14/2024-08-14-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240814/</link><pubDate>Wed, 14 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/14/2024-08-14-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240814/</guid><description>&lt;h1 id="373-查找和最小的-k-对数字httpsleetcodecnproblemsfind-k-pairs-with-smallest-sums">&lt;a href="https://leetcode.cn/problems/find-k-pairs-with-smallest-sums/">373. 查找和最小的 K 对数字&lt;/a>&lt;/h1>
+&lt;p>&lt;em>算数评级：5&lt;/em> &lt;strong>中等&lt;/strong>&lt;/p>
+&lt;h2 id="堆">堆&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 每个丑数都可以用较小的丑数乘以2，3，5得到，因此可以用优先队列来维护
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 小顶堆维护丑数，弹出的第n个数就是第n个丑数
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param n
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @return
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd;font-style:italic">public&lt;/span> &lt;span style="color:#8be9fd">int&lt;/span> &lt;span style="color:#50fa7b">nthUglyNumber&lt;/span>(&lt;span style="color:#8be9fd">int&lt;/span> n) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> PriorityQueue&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Long&lt;span style="color:#ff79c6">&amp;gt;&lt;/span> pq &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">new&lt;/span> PriorityQueue&lt;span style="color:#ff79c6">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> HashSet&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Long&lt;span style="color:#ff79c6">&amp;gt;&lt;/span> set &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">new&lt;/span> HashSet&lt;span style="color:#ff79c6">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">long&lt;/span> start &lt;span style="color:#ff79c6">=&lt;/span> 1L;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pq.&lt;span style="color:#50fa7b">add&lt;/span>(start);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> set.&lt;span style="color:#50fa7b">add&lt;/span>(start);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">long&lt;/span> ans &lt;span style="color:#ff79c6">=&lt;/span> 0L;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">for&lt;/span> (&lt;span style="color:#8be9fd">int&lt;/span> i &lt;span style="color:#ff79c6">=&lt;/span> 0; i &lt;span style="color:#ff79c6">&amp;lt;&lt;/span> n; i&lt;span style="color:#ff79c6">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ans &lt;span style="color:#ff79c6">=&lt;/span> pq.&lt;span style="color:#50fa7b">poll&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">long&lt;/span> tmp1 &lt;span style="color:#ff79c6">=&lt;/span> ans &lt;span style="color:#ff79c6">*&lt;/span> 2;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">long&lt;/span> tmp2 &lt;span style="color:#ff79c6">=&lt;/span> ans &lt;span style="color:#ff79c6">*&lt;/span> 3;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">long&lt;/span> tmp3 &lt;span style="color:#ff79c6">=&lt;/span> ans &lt;span style="color:#ff79c6">*&lt;/span> 5;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">if&lt;/span> (&lt;span style="color:#ff79c6">!&lt;/span>set.&lt;span style="color:#50fa7b">contains&lt;/span>(tmp1)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pq.&lt;span style="color:#50fa7b">add&lt;/span>(tmp1);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> set.&lt;span style="color:#50fa7b">add&lt;/span>(tmp1);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">if&lt;/span> (&lt;span style="color:#ff79c6">!&lt;/span>set.&lt;span style="color:#50fa7b">contains&lt;/span>(tmp2)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pq.&lt;span style="color:#50fa7b">add&lt;/span>(tmp2);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> set.&lt;span style="color:#50fa7b">add&lt;/span>(tmp2);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">if&lt;/span> (&lt;span style="color:#ff79c6">!&lt;/span>set.&lt;span style="color:#50fa7b">contains&lt;/span>(tmp3)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pq.&lt;span style="color:#50fa7b">add&lt;/span>(tmp3);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> set.&lt;span style="color:#50fa7b">add&lt;/span>(tmp3);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">return&lt;/span> (&lt;span style="color:#8be9fd">int&lt;/span>) ans;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="动态规划">动态规划&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 动态规划
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * dp[i]定义： dp[i]表示第i个丑数
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 递推公式： dp[i] = min(dp[p2] * 2, dp[p3] * 3, dp[p5] * 5)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 初始化：dp[1] = 1
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param n
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @return
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd;font-style:italic">public&lt;/span> &lt;span style="color:#8be9fd">int&lt;/span> &lt;span style="color:#50fa7b">nthUglyNumber2&lt;/span>(&lt;span style="color:#8be9fd">int&lt;/span> n) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[]&lt;/span> dp &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">new&lt;/span> &lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[&lt;/span>n&lt;span style="color:#ff79c6">+&lt;/span>1&lt;span style="color:#ff79c6">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dp&lt;span style="color:#ff79c6">[&lt;/span>1&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">=&lt;/span> 1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">int&lt;/span> p2 &lt;span style="color:#ff79c6">=&lt;/span> 1, p3 &lt;span style="color:#ff79c6">=&lt;/span> 1, p5 &lt;span style="color:#ff79c6">=&lt;/span> 1;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">for&lt;/span> (&lt;span style="color:#8be9fd">int&lt;/span> i &lt;span style="color:#ff79c6">=&lt;/span> 2; i &lt;span style="color:#ff79c6">&amp;lt;=&lt;/span> n; i&lt;span style="color:#ff79c6">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">int&lt;/span> num2 &lt;span style="color:#ff79c6">=&lt;/span> dp&lt;span style="color:#ff79c6">[&lt;/span>p2&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">*&lt;/span> 2;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">int&lt;/span> num3 &lt;span style="color:#ff79c6">=&lt;/span> dp&lt;span style="color:#ff79c6">[&lt;/span>p3&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">*&lt;/span> 3;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">int&lt;/span> num5 &lt;span style="color:#ff79c6">=&lt;/span> dp&lt;span style="color:#ff79c6">[&lt;/span>p5&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">*&lt;/span> 5;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dp&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">=&lt;/span> Math.&lt;span style="color:#50fa7b">min&lt;/span>(num2, Math.&lt;span style="color:#50fa7b">min&lt;/span>(num3, num5));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">if&lt;/span> (dp&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">==&lt;/span> num2) p2&lt;span style="color:#ff79c6">++&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">if&lt;/span> (dp&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">==&lt;/span> num3) p3&lt;span style="color:#ff79c6">++&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">if&lt;/span> (dp&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">==&lt;/span> num5) p5&lt;span style="color:#ff79c6">++&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">return&lt;/span> dp&lt;span style="color:#ff79c6">[&lt;/span>n&lt;span style="color:#ff79c6">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="165-比较版本号httpsleetcodecnproblemscompare-version-numbers">&lt;a href="https://leetcode.cn/problems/compare-version-numbers/">165. 比较版本号&lt;/a>&lt;/h1>
+&lt;p>&lt;em>算数评级：4&lt;/em> &lt;strong>中等&lt;/strong>&lt;/p></description></item><item><title>leetcode打卡 - 2024/8/14</title><link>https://wangzhendong20.github.io/2024/08/14/2024-08-14-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240814/</link><pubDate>Wed, 14 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/14/2024-08-14-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240814/</guid><description>&lt;h1 id="373-查找和最小的-k-对数字httpsleetcodecnproblemsfind-k-pairs-with-smallest-sums">&lt;a href="https://leetcode.cn/problems/find-k-pairs-with-smallest-sums/">373. 查找和最小的 K 对数字&lt;/a>&lt;/h1>
+&lt;p>&lt;em>×&lt;/em>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4">/**
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 最小的k对数只能是nums1[0]或nums2[0]中选一个，然后再从其它的里面选择小的。
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 所以可以用小根堆来存。
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * 要注意去重。
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param nums1
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param nums2
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @param k
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> * @return
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#6272a4"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd;font-style:italic">public&lt;/span> List&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>List&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Integer&lt;span style="color:#ff79c6">&amp;gt;&amp;gt;&lt;/span> &lt;span style="color:#50fa7b">kSmallestPairs&lt;/span>(&lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[]&lt;/span> nums1, &lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[]&lt;/span> nums2, &lt;span style="color:#8be9fd">int&lt;/span> k) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>List&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Integer&lt;span style="color:#ff79c6">&amp;gt;&amp;gt;&lt;/span> res &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">new&lt;/span> ArrayList&lt;span style="color:#ff79c6">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> PriorityQueue&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>&lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[]&amp;gt;&lt;/span> pq &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">new&lt;/span> PriorityQueue&lt;span style="color:#ff79c6">&amp;lt;&amp;gt;&lt;/span>((a, b) &lt;span style="color:#ff79c6">-&amp;gt;&lt;/span> a&lt;span style="color:#ff79c6">[&lt;/span>0&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">-&lt;/span> b&lt;span style="color:#ff79c6">[&lt;/span>0&lt;span style="color:#ff79c6">]&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">for&lt;/span> (&lt;span style="color:#8be9fd">int&lt;/span> i &lt;span style="color:#ff79c6">=&lt;/span> 0; i &lt;span style="color:#ff79c6">&amp;lt;&lt;/span> Math.&lt;span style="color:#50fa7b">min&lt;/span>(nums1.&lt;span style="color:#50fa7b">length&lt;/span>, k); i&lt;span style="color:#ff79c6">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pq.&lt;span style="color:#50fa7b">offer&lt;/span>(&lt;span style="color:#ff79c6">new&lt;/span> &lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[]&lt;/span>{nums1&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">+&lt;/span> nums2&lt;span style="color:#ff79c6">[&lt;/span>0&lt;span style="color:#ff79c6">]&lt;/span>, i , 0});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">while&lt;/span> (res.&lt;span style="color:#50fa7b">size&lt;/span>() &lt;span style="color:#ff79c6">&amp;lt;&lt;/span> k) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[]&lt;/span> cur &lt;span style="color:#ff79c6">=&lt;/span> pq.&lt;span style="color:#50fa7b">poll&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">int&lt;/span> i &lt;span style="color:#ff79c6">=&lt;/span> cur&lt;span style="color:#ff79c6">[&lt;/span>1&lt;span style="color:#ff79c6">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">int&lt;/span> j &lt;span style="color:#ff79c6">=&lt;/span> cur&lt;span style="color:#ff79c6">[&lt;/span>2&lt;span style="color:#ff79c6">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> res.&lt;span style="color:#50fa7b">add&lt;/span>(List.&lt;span style="color:#50fa7b">of&lt;/span>(nums1&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">]&lt;/span>, nums2&lt;span style="color:#ff79c6">[&lt;/span>j&lt;span style="color:#ff79c6">]&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">if&lt;/span> (j &lt;span style="color:#ff79c6">+&lt;/span> 1 &lt;span style="color:#ff79c6">&amp;lt;&lt;/span> nums2.&lt;span style="color:#50fa7b">length&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#6272a4">// 防止重复出现&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> pq.&lt;span style="color:#50fa7b">offer&lt;/span>(&lt;span style="color:#ff79c6">new&lt;/span> &lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[]&lt;/span>{nums1&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">]&lt;/span> &lt;span style="color:#ff79c6">+&lt;/span> nums2&lt;span style="color:#ff79c6">[&lt;/span>j&lt;span style="color:#ff79c6">+&lt;/span>1&lt;span style="color:#ff79c6">]&lt;/span>, i, j&lt;span style="color:#ff79c6">+&lt;/span>1});
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">return&lt;/span> res;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="378-有序矩阵中第-k-小的元素httpsleetcodecnproblemskth-smallest-element-in-a-sorted-matrix">&lt;a href="https://leetcode.cn/problems/kth-smallest-element-in-a-sorted-matrix/">378. 有序矩阵中第 K 小的元素&lt;/a>&lt;/h1>
 &lt;p>&lt;em>×&lt;/em>&lt;/p></description></item><item><title>每日一题 - 2024/8/9</title><link>https://wangzhendong20.github.io/2024/08/09/2024-08-09-leetcodeDaily4/</link><pubDate>Fri, 09 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/09/2024-08-09-leetcodeDaily4/</guid><description>&lt;h1 id="每日一题---202489">每日一题 - 2024/8/9&lt;/h1>
 &lt;h1 id="3132-找出与数组相加的整数-iihttpsleetcodecnproblemsfind-the-integer-added-to-array-ii">&lt;a href="https://leetcode.cn/problems/find-the-integer-added-to-array-ii/">3132. 找出与数组相加的整数 II&lt;/a>&lt;/h1>
 &lt;p>&lt;em>原来做周赛的时候做过一次了。&lt;/em>
 &lt;em>代码参考：https://leetcode.cn/problems/find-the-integer-added-to-array-ii/solutions/2759118/onlogn-pai-xu-shuang-zhi-zhen-pythonjava-rdj9/，自己写的代码相比之下太烂了呜呜呜。&lt;/em>&lt;/p></description></item><item><title>Spring Retry &amp; Guava Retry - 快速入门</title><link>https://wangzhendong20.github.io/2024/08/04/2024-8-4-SpringRetry&amp;GuavaRetry/</link><pubDate>Sun, 04 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/04/2024-8-4-SpringRetry&amp;GuavaRetry/</guid><description>&lt;h1 id="spring-retry--guava-retry">Spring Retry &amp;amp; Guava Retry&lt;/h1>
 &lt;h1 id="spring-retry">Spring Retry&lt;/h1>
 &lt;h2 id="spring-retry简介">Spring Retry简介&lt;/h2>
-&lt;p>Spring Retry 为 Spring 应用程序提供了声明性重试支持。它主要是针对可能抛出异常的一些调用操作，进行有策略的重试。&lt;/p></description></item><item><title>每日一题 - 2024/8/4</title><link>https://wangzhendong20.github.io/2024/08/04/2024-08-04-leetcodeDaily3/</link><pubDate>Sun, 04 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/04/2024-08-04-leetcodeDaily3/</guid><description>&lt;h1 id="每日一题---202484">每日一题 - 2024/8/4&lt;/h1>
+&lt;p>Spring Retry 为 Spring 应用程序提供了声明性重试支持。它主要是针对可能抛出异常的一些调用操作，进行有策略的重试。&lt;/p>
+&lt;h2 id="快速入门">快速入门&lt;/h2>
+&lt;blockquote>
+&lt;p>这里以&lt;em>SleepingFace BI&lt;/em>项目中调用AI接口为例，因为AIGC可能因为异常情况而失败，因此使用重试机制提高系统的容错性。&lt;/p></description></item><item><title>每日一题 - 2024/8/4</title><link>https://wangzhendong20.github.io/2024/08/04/2024-08-04-leetcodeDaily3/</link><pubDate>Sun, 04 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/04/2024-08-04-leetcodeDaily3/</guid><description>&lt;h1 id="每日一题---202484">每日一题 - 2024/8/4&lt;/h1>
 &lt;h1 id="572-另一棵树的子树httpsleetcodecnproblemssubtree-of-another-tree">&lt;a href="https://leetcode.cn/problems/subtree-of-another-tree/">572. 另一棵树的子树&lt;/a>&lt;/h1>
-&lt;p>&lt;strong>经典题目&lt;/strong>&lt;/p></description></item><item><title>SDK开发 - 快速入门</title><link>https://wangzhendong20.github.io/2024/08/03/2024-8-3-SDK%E5%BC%80%E5%8F%91/</link><pubDate>Sat, 03 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/03/2024-8-3-SDK%E5%BC%80%E5%8F%91/</guid><description>&lt;h1 id="sdk开发">SDK开发&lt;/h1>
+&lt;p>&lt;strong>经典题目&lt;/strong>&lt;/p>
+&lt;h2 id="思路">思路&lt;/h2>
+&lt;p>判断是否是一棵树的子树，那么我们首先想到如何判断两个树是相同的。&lt;/p>
+&lt;p>判断两个树是否相同有五种情况：&lt;/p>
+&lt;ul>
+&lt;li>左右子树为空：true&lt;/li>
+&lt;li>左子树为空，右子树不为空：false&lt;/li>
+&lt;li>左子树不为空，右子树为空：false&lt;/li>
+&lt;li>左右子树都不为空，但左右节点值不相等：false&lt;/li>
+&lt;li>左右子树都不为空，且左右节点值相等：true&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ff79c6">if&lt;/span> (node1 &lt;span style="color:#ff79c6">==&lt;/span> &lt;span style="color:#ff79c6">null&lt;/span> &lt;span style="color:#ff79c6">&amp;amp;&amp;amp;&lt;/span> node2 &lt;span style="color:#ff79c6">==&lt;/span> &lt;span style="color:#ff79c6">null&lt;/span>) &lt;span style="color:#ff79c6">return&lt;/span> &lt;span style="color:#ff79c6">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ff79c6">if&lt;/span> (node1 &lt;span style="color:#ff79c6">==&lt;/span> &lt;span style="color:#ff79c6">null&lt;/span> &lt;span style="color:#ff79c6">||&lt;/span> node2 &lt;span style="color:#ff79c6">==&lt;/span> &lt;span style="color:#ff79c6">null&lt;/span> &lt;span style="color:#ff79c6">||&lt;/span> node1.&lt;span style="color:#50fa7b">val&lt;/span> &lt;span style="color:#ff79c6">!=&lt;/span> node2.&lt;span style="color:#50fa7b">val&lt;/span>) &lt;span style="color:#ff79c6">return&lt;/span> &lt;span style="color:#ff79c6">false&lt;/span>;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>于是我们递归的判断左子树和右子树&lt;/p></description></item><item><title>SDK开发 - 快速入门</title><link>https://wangzhendong20.github.io/2024/08/03/2024-8-3-SDK%E5%BC%80%E5%8F%91/</link><pubDate>Sat, 03 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/03/2024-8-3-SDK%E5%BC%80%E5%8F%91/</guid><description>&lt;h1 id="sdk开发">SDK开发&lt;/h1>
 &lt;p>&lt;strong>前言&lt;/strong>：今天尝试将&lt;em>SleepingFace BI&lt;/em>项目中的功能开发为SDK，这样调用者只需要引入依赖，配置ak/sk，然后调用API就可以使用了。&lt;/p></description></item><item><title>每日一题 - 2024/8/3</title><link>https://wangzhendong20.github.io/2024/08/03/2024-08-03-leetcodeDaily2/</link><pubDate>Sat, 03 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/03/2024-08-03-leetcodeDaily2/</guid><description>&lt;h1 id="每日一题---202483">每日一题 - 2024/8/3&lt;/h1>
 &lt;h1 id="3143-正方形中的最多点数httpsleetcodecnproblemssubtree-of-another-tree">&lt;a href="https://leetcode.cn/problems/subtree-of-another-tree/">[3143. 正方形中的最多点数]&lt;/a>&lt;/h1>
 &lt;h2 id="方法一">方法一&lt;/h2>
-&lt;p>先用TreeMap记录每个范围正方形内的所有字符，&lt;/p></description></item><item><title>每日一题 - 2024/8/2</title><link>https://wangzhendong20.github.io/2024/08/02/2024-08-02-leetcodeDaily1/</link><pubDate>Fri, 02 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/02/2024-08-02-leetcodeDaily1/</guid><description>&lt;h1 id="每日一题---202482">每日一题 - 2024/8/2&lt;/h1>
+&lt;p>先用TreeMap记录每个范围正方形内的所有字符，&lt;/p>
+&lt;p>之后遍历TreeMap，如果遇到相同字符就停止统计。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd;font-style:italic">public&lt;/span> &lt;span style="color:#8be9fd">int&lt;/span> &lt;span style="color:#50fa7b">maxPointsInsideSquare&lt;/span>(&lt;span style="color:#8be9fd">int&lt;/span>&lt;span style="color:#ff79c6">[][]&lt;/span> points, String s) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">int&lt;/span> n &lt;span style="color:#ff79c6">=&lt;/span> points.&lt;span style="color:#50fa7b">length&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Set&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Character&lt;span style="color:#ff79c6">&amp;gt;&lt;/span> set &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">new&lt;/span> HashSet&lt;span style="color:#ff79c6">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TreeMap&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Integer, List&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Character&lt;span style="color:#ff79c6">&amp;gt;&amp;gt;&lt;/span> map &lt;span style="color:#ff79c6">=&lt;/span> &lt;span style="color:#ff79c6">new&lt;/span> TreeMap&lt;span style="color:#ff79c6">&amp;lt;&amp;gt;&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">for&lt;/span> (&lt;span style="color:#8be9fd">int&lt;/span> i &lt;span style="color:#ff79c6">=&lt;/span> 0; i &lt;span style="color:#ff79c6">&amp;lt;&lt;/span> n; i&lt;span style="color:#ff79c6">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map.&lt;span style="color:#50fa7b">computeIfAbsent&lt;/span>(Math.&lt;span style="color:#50fa7b">max&lt;/span>(Math.&lt;span style="color:#50fa7b">abs&lt;/span>(points&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">][&lt;/span>0&lt;span style="color:#ff79c6">]&lt;/span>), Math.&lt;span style="color:#50fa7b">abs&lt;/span>(points&lt;span style="color:#ff79c6">[&lt;/span>i&lt;span style="color:#ff79c6">][&lt;/span>1&lt;span style="color:#ff79c6">]&lt;/span>)), key &lt;span style="color:#ff79c6">-&amp;gt;&lt;/span> &lt;span style="color:#ff79c6">new&lt;/span> ArrayList&lt;span style="color:#ff79c6">&amp;lt;&amp;gt;&lt;/span>()).&lt;span style="color:#50fa7b">add&lt;/span>(s.&lt;span style="color:#50fa7b">charAt&lt;/span>(i));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#8be9fd">int&lt;/span> ans &lt;span style="color:#ff79c6">=&lt;/span> 0;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">for&lt;/span> (Map.&lt;span style="color:#50fa7b">Entry&lt;/span>&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Integer, List&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Character&lt;span style="color:#ff79c6">&amp;gt;&amp;gt;&lt;/span> entry : map.&lt;span style="color:#50fa7b">entrySet&lt;/span>()) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> List&lt;span style="color:#ff79c6">&amp;lt;&lt;/span>Character&lt;span style="color:#ff79c6">&amp;gt;&lt;/span> t &lt;span style="color:#ff79c6">=&lt;/span> entry.&lt;span style="color:#50fa7b">getValue&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">for&lt;/span> (Character c : t) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">if&lt;/span> (set.&lt;span style="color:#50fa7b">contains&lt;/span>(c)) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">return&lt;/span> ans;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> set.&lt;span style="color:#50fa7b">add&lt;/span>(c);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ans &lt;span style="color:#ff79c6">=&lt;/span> set.&lt;span style="color:#50fa7b">size&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#ff79c6">return&lt;/span> ans;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="方法二维护次小距离的最小值">方法二：维护次小距离的最小值&lt;/h2>
+&lt;p>&lt;em>题解来自于： &lt;a href="https://leetcode.cn/problems/maximum-points-inside-the-square/solutions/2775310/er-fen-bian-chang-tong-shi-ji-lu-da-an-z-92w5/">https://leetcode.cn/problems/maximum-points-inside-the-square/solutions/2775310/er-fen-bian-chang-tong-shi-ji-lu-da-an-z-92w5/&lt;/a>&lt;/em>&lt;/p></description></item><item><title>每日一题 - 2024/8/2</title><link>https://wangzhendong20.github.io/2024/08/02/2024-08-02-leetcodeDaily1/</link><pubDate>Fri, 02 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/02/2024-08-02-leetcodeDaily1/</guid><description>&lt;h1 id="每日一题---202482">每日一题 - 2024/8/2&lt;/h1>
 &lt;h1 id="3128-直角三角形httpsleetcodecnproblemsright-triangles">&lt;a href="https://leetcode.cn/problems/right-triangles/">3128. 直角三角形&lt;/a>&lt;/h1>
 &lt;h2 id="题目介绍">题目介绍&lt;/h2>
-&lt;p>给你一个二维 int 矩阵 &lt;code>grid&lt;/code> 。&lt;/p></description></item><item><title>利用AOP实现权限校验和请求响应日志输出</title><link>https://wangzhendong20.github.io/2024/08/01/2024-8-1-AOP/</link><pubDate>Thu, 01 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/01/2024-8-1-AOP/</guid><description>&lt;h1 id="利用aop实现权限校验和请求响应日志输出">利用AOP实现权限校验和请求响应日志输出&lt;/h1>
-&lt;p>&lt;strong>前言：&lt;/strong> 记录一下在&lt;em>SleepingFace BI&lt;/em>项目里利用AOP做了什么？&lt;/p></description></item><item><title>代码随想录+leetcode笔记</title><link>https://wangzhendong20.github.io/2024/07/23/leetcode-note/</link><pubDate>Tue, 23 Jul 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/07/23/leetcode-note/</guid><description>&lt;h1 id="一些工具类方法">一些工具类方法&lt;/h1>
+&lt;p>给你一个二维 int 矩阵 &lt;code>grid&lt;/code> 。&lt;/p>
+&lt;p>请你返回使用 &lt;code>grid&lt;/code> 中的 3 个元素可以构建的 &lt;strong>直角三角形&lt;/strong> 数目，且满足 3 个元素值 &lt;strong>都&lt;/strong> 为 1 。&lt;/p>
+&lt;p>&lt;strong>注意：&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>如果 &lt;code>grid&lt;/code> 中 3 个元素满足：一个元素与另一个元素在 &lt;strong>同一行&lt;/strong>，同时与第三个元素在 &lt;strong>同一列&lt;/strong> ，那么这 3 个元素称为一个 &lt;strong>直角三角形&lt;/strong> 。这 3 个元素互相之间不需要相邻。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>提示：&lt;/strong>&lt;/p></description></item><item><title>利用AOP实现权限校验和请求响应日志输出</title><link>https://wangzhendong20.github.io/2024/08/01/2024-8-1-AOP/</link><pubDate>Thu, 01 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/01/2024-8-1-AOP/</guid><description>&lt;h1 id="利用aop实现权限校验和请求响应日志输出">利用AOP实现权限校验和请求响应日志输出&lt;/h1>
+&lt;p>&lt;strong>前言：&lt;/strong> 记录一下在&lt;em>SleepingFace BI&lt;/em>项目里利用AOP做了什么？&lt;/p>
+&lt;ul>
+&lt;li>权限校验&lt;/li>
+&lt;li>请求响应日志输出&lt;/li>
+&lt;/ul>
+&lt;h1 id="1-aop相关知识">1. AOP相关知识&lt;/h1>
+&lt;h2 id="11-aop简介">1.1 AOP简介&lt;/h2>
+&lt;p>AOP(Aspect-Oriented Programming:面向切面编程)能够将那些&lt;strong>与业务无关&lt;/strong>，却为业务模块所&lt;strong>共同调用&lt;/strong>的逻辑或责任（例如事务处理、日志管理、权限控制等）封装起来，便于减少系统的重复代码，降低模块间的耦合度，并有利于未来的可拓展性和可维护性。&lt;/p></description></item><item><title>代码随想录+leetcode笔记</title><link>https://wangzhendong20.github.io/2024/07/23/leetcode-note/</link><pubDate>Tue, 23 Jul 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/07/23/leetcode-note/</guid><description>&lt;h1 id="一些工具类方法">一些工具类方法&lt;/h1>
 &lt;h2 id="collections">Collections&lt;/h2>
 &lt;h3 id="排序操作httpsjavaguidecnjavacollectionjava-collection-questions-02html排序操作">&lt;a href="https://javaguide.cn/java/collection/java-collection-questions-02.html#%E6%8E%92%E5%BA%8F%E6%93%8D%E4%BD%9C">排序操作&lt;/a>&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd">void&lt;/span> &lt;span style="color:#50fa7b">reverse&lt;/span>(List list)&lt;span style="color:#6272a4">//反转&lt;/span>
@@ -45,4 +365,14 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd">void&lt;/span> &lt;span style="color:#50fa7b">sort&lt;/span>(List list, Comparator c)&lt;span style="color:#6272a4">//定制排序，由Comparator控制排序逻辑&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd">void&lt;/span> &lt;span style="color:#50fa7b">swap&lt;/span>(List list, &lt;span style="color:#8be9fd">int&lt;/span> i , &lt;span style="color:#8be9fd">int&lt;/span> j)&lt;span style="color:#6272a4">//交换两个索引位置的元素&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd">void&lt;/span> &lt;span style="color:#50fa7b">rotate&lt;/span>(List list, &lt;span style="color:#8be9fd">int&lt;/span> distance)&lt;span style="color:#6272a4">//旋转。当distance为正数时，将list后distance个元素整体移到前面。当distance为负数时，将 list的前distance个元素整体移到后面&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pr</description></item></channel></rss>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="查找替换操作">查找替换操作&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd">int&lt;/span> &lt;span style="color:#50fa7b">binarySearch&lt;/span>(List list, Object key)&lt;span style="color:#6272a4">//对List进行二分查找，返回索引，注意List必须是有序的&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd">int&lt;/span> &lt;span style="color:#50fa7b">max&lt;/span>(Collection coll)&lt;span style="color:#6272a4">//根据元素的自然顺序，返回最大的元素。 类比int min(Collection coll)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd">int&lt;/span> &lt;span style="color:#50fa7b">max&lt;/span>(Collection coll, Comparator c)&lt;span style="color:#6272a4">//根据定制排序，返回最大元素，排序规则由Comparatator类控制。类比int min(Collection coll, Comparator c)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd">void&lt;/span> &lt;span style="color:#50fa7b">fill&lt;/span>(List list, Object obj)&lt;span style="color:#6272a4">//用指定的元素代替指定list中的所有元素&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd">int&lt;/span> &lt;span style="color:#50fa7b">frequency&lt;/span>(Collection c, Object o)&lt;span style="color:#6272a4">//统计元素出现次数&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd">int&lt;/span> &lt;span style="color:#50fa7b">indexOfSubList&lt;/span>(List list, List target)&lt;span style="color:#6272a4">//统计target在list中第一次出现的索引，找不到则返回-1，类比int lastIndexOfSubList(List source, list target)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#8be9fd">boolean&lt;/span> &lt;span style="color:#50fa7b">replaceAll&lt;/span>(List list, Object oldVal, Object newVal)&lt;span style="color:#6272a4">//用新元素替换旧元素&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="systemarraycopy函数">System.arraycopy()函数&lt;/h2>
+&lt;h2 id="一维数组排序">一维数组排序&lt;/h2>
+&lt;p>使用stream流的方式来进行排序&lt;/p></description></item></channel></rss>
