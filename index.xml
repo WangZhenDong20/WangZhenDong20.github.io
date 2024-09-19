@@ -1,38 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>SleepingFace Blog</title><link>https://wangzhendong20.github.io/</link><description>Recent content on SleepingFace Blog</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Fri, 13 Sep 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://wangzhendong20.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>行测 - 言语理解笔记</title><link>https://wangzhendong20.github.io/2024/09/13/2024-9-13-%E8%A8%80%E8%AF%AD%E7%90%86%E8%A7%A3%E7%AC%94%E8%AE%B0/</link><pubDate>Fri, 13 Sep 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/09/13/2024-9-13-%E8%A8%80%E8%AF%AD%E7%90%86%E8%A7%A3%E7%AC%94%E8%AE%B0/</guid><description>&lt;p>
- &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-10-41.png" alt="">
-
-&lt;/p>
-&lt;p>
- &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-10-55.png" alt="">
-
-&lt;/p>
-&lt;p>
- &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-11-09.png" alt="">
-
-&lt;/p>
-&lt;p>
- &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-11-21.png" alt="">
-
-&lt;/p>
-&lt;p>
- &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-11-30.png" alt="">
-
-&lt;/p>
-&lt;p>
- &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-11-40.png" alt="">
-
-&lt;/p>
-&lt;p>
- &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-11-52.png" alt="">
-
-&lt;/p>
-&lt;p>
- &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-12-00.png" alt="">
-
-&lt;/p>
-&lt;blockquote>
-&lt;p>侵权删&lt;/p>
-&lt;/blockquote></description></item><item><title>leetcode打卡 - 2024/8/23</title><link>https://wangzhendong20.github.io/2024/08/23/2024-08-23-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240823/</link><pubDate>Fri, 23 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/23/2024-08-23-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240823/</guid><description>&lt;p>&lt;em>今天主要是快速幂（分治法）和区间DP。&lt;/em>&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>SleepingFace Blog</title><link>https://wangzhendong20.github.io/</link><description>Recent content on SleepingFace Blog</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Fri, 23 Aug 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://wangzhendong20.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>leetcode打卡 - 2024/8/23</title><link>https://wangzhendong20.github.io/2024/08/23/2024-08-23-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240823/</link><pubDate>Fri, 23 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/23/2024-08-23-%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%9520240823/</guid><description>&lt;p>&lt;em>今天主要是快速幂（分治法）和区间DP。&lt;/em>&lt;/p>
 &lt;h1 id="50-powx-nhttpsleetcodecnproblemspowx-n">&lt;a href="https://leetcode.cn/problems/powx-n/">50. Pow(x, n)&lt;/a>&lt;/h1>
 &lt;p>&lt;em>x&lt;/em>&lt;/p>
 &lt;blockquote>
@@ -360,7 +326,41 @@
 &lt;li>parameter_list 的形式为 (param1 type1, param2 type2, …)&lt;/li>
 &lt;li>return_value_list 的形式为 (ret1 type1, ret2 type2, …)&lt;/li>
 &lt;/ul>
-&lt;p>&lt;strong>类型&lt;/strong>：&lt;/p></description></item><item><title>行测 - 资料分析笔记</title><link>https://wangzhendong20.github.io/2024/08/05/2024-8-5-%E8%B5%84%E6%96%99%E5%88%86%E6%9E%90%E7%AC%94%E8%AE%B0/</link><pubDate>Mon, 05 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/05/2024-8-5-%E8%B5%84%E6%96%99%E5%88%86%E6%9E%90%E7%AC%94%E8%AE%B0/</guid><description>&lt;h1 id="1实用速算技巧">1.实用速算技巧&lt;/h1>
+&lt;p>&lt;strong>类型&lt;/strong>：&lt;/p></description></item><item><title>行测 - 言语理解笔记</title><link>https://wangzhendong20.github.io/2024/09/13/2024-9-13-%E8%A8%80%E8%AF%AD%E7%90%86%E8%A7%A3%E7%AC%94%E8%AE%B0/</link><pubDate>Mon, 05 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/09/13/2024-9-13-%E8%A8%80%E8%AF%AD%E7%90%86%E8%A7%A3%E7%AC%94%E8%AE%B0/</guid><description>&lt;p>
+ &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-10-41.png" alt="">
+
+&lt;/p>
+&lt;p>
+ &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-10-55.png" alt="">
+
+&lt;/p>
+&lt;p>
+ &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-11-09.png" alt="">
+
+&lt;/p>
+&lt;p>
+ &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-11-21.png" alt="">
+
+&lt;/p>
+&lt;p>
+ &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-11-30.png" alt="">
+
+&lt;/p>
+&lt;p>
+ &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-11-40.png" alt="">
+
+&lt;/p>
+&lt;p>
+ &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-11-52.png" alt="">
+
+&lt;/p>
+&lt;p>
+ &lt;img src="https://wangzhendong20.github.io/img/2024-9-13-%e8%a8%80%e8%af%ad%e7%90%86%e8%a7%a3%e7%ac%94%e8%ae%b0/Snipaste_2024-09-13_22-12-00.png" alt="">
+
+&lt;/p>
+&lt;blockquote>
+&lt;p>侵权删&lt;/p>
+&lt;/blockquote></description></item><item><title>行测 - 资料分析笔记</title><link>https://wangzhendong20.github.io/2024/08/05/2024-8-5-%E8%B5%84%E6%96%99%E5%88%86%E6%9E%90%E7%AC%94%E8%AE%B0/</link><pubDate>Mon, 05 Aug 2024 00:00:00 +0000</pubDate><guid>https://wangzhendong20.github.io/2024/08/05/2024-8-5-%E8%B5%84%E6%96%99%E5%88%86%E6%9E%90%E7%AC%94%E8%AE%B0/</guid><description>&lt;h1 id="1实用速算技巧">1.实用速算技巧&lt;/h1>
 &lt;h2 id="11-加法技巧--尾数法高位叠加法削峰填谷法">1.1 加法技巧&amp;ndash;尾数法、高位叠加法、削峰填谷法&lt;/h2>
 &lt;h2 id="12-减法技巧--整数基准值法2112分段法">1.2 减法技巧&amp;ndash;整数基准值法、“21”“12”分段法&lt;/h2>
 &lt;h2 id="13-乘法技巧--小分互换法拆分法">1.3 乘法技巧&amp;ndash;小分互换法、拆分法&lt;/h2>
